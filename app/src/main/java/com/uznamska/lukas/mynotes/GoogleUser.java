@@ -5,6 +5,8 @@
 package com.uznamska.lukas.mynotes;
 
 
+import android.util.Log;
+
 class GoogleUser {
     private final String mNameSurname;
     private final String mImageUrl;
@@ -55,6 +57,7 @@ class GoogleUser {
         }
 
         UserBuilder email(String email) {
+            Log.d("GGG", "FFFF000");
             this.mEmail = email;
             return this;
         }
