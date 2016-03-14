@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">MyNotes</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="element_text">Element</string>
+    <string name="action_search">Search</string>
+    <string name="share">Share</string>
+    <string name="edit_message">Title</string>
+    <string name="edit_age">Text</string>
+    <string name="take_note">Take a note...</string>
+    <string name="search_title">search</string>
+    <string name="edit_msgtext">Text</string>
+    <string name="edit_title">Title</string>
+    <string name="edit_msg_text">Text</string>
+    <string name="edit_todo">Edit element</string>
+    <string name="list_item">List item</string>
+</resources>

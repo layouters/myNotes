@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar_bottom"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:layout_alignParentBottom="true"
+    android:layout_gravity="bottom|end">
+    app:popupTheme="@style/AppTheme.PopupOverlay"
+    android:theme="@style/AppTheme_Bottom">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/btn_take_note"
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:layout_height="fill_parent"
+            android:layout_marginRight="?attr/actionBarSize"
+            android:layout_gravity="start"
+            android:gravity="center_vertical"
+            android:text="@string/take_note"
+            android:onClick="onClick"
+            android:clickable="true"
+            android:tag="take_note"
+            android:theme="@style/AppTheme_Bottom"
+            />
+
+        <!-- This is a custom left side button -->
+
+        <!--<ImageButton-->
+            <!--android:id="@+id/btn_camera"-->
+            <!--android:layout_width="?attr/actionBarSize"-->
+            <!--android:layout_height="?attr/actionBarSize"-->
+            <!--android:layout_marginRight="?attr/actionBarSize"-->
+            <!--android:layout_gravity="end|center_vertical"-->
+            <!--android:src="@drawable/ic_menu_camera"-->
+            <!--style="@style/Widget.AppCompat.ActionButton" />-->
+
+        <!--<ImageButton-->
+            <!--android:id="@+id/btn_gallery"-->
+            <!--android:layout_width="?attr/actionBarSize"-->
+            <!--android:layout_height="?attr/actionBarSize"-->
+            <!--android:layout_gravity="end"-->
+            <!--android:src="@drawable/ic_menu_gallery"-->
+            <!--style="@style/Widget.AppCompat.ActionButton" />-->
+
+
+
+
+    </FrameLayout>
+</android.support.v7.widget.Toolbar>

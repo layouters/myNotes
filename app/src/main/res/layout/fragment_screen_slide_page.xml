@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2016.  Lukasz Fiszer
+  -->
+
+<!-- fragment_screen_slide_page.xml -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:foregroundGravity="bottom">
+
+    <TextView style="?android:textAppearanceMedium"
+        android:id="@+id/ad_text"
+        android:padding="40dp"
+        android:gravity="center_horizontal|bottom"
+        android:lineSpacingMultiplier="1.2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notatki tekstowe!!!"
+        android:layout_gravity="center"
+        android:foregroundGravity="bottom" />
+</FrameLayout>
