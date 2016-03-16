@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes.items;
 
 /**
@@ -38,5 +42,10 @@ public class ListItem implements INoteItem {
                 "text='" + text + '\'' +
                 ", ticked=" + ticked +
                 '}';
+    }
+
+    @Override
+    public boolean isSimple() {
+        return true;
     }
 }

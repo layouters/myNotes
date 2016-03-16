@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes;
 
 import android.content.ContentValues;
@@ -103,6 +107,7 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new NoteAdapter(mNote, this.getContext());
         mRecyclerView.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
 //        ItemTouchHelper.Callback callback =
 //                new CardItemTouchHelper(mAdapter);
 //        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
@@ -147,8 +152,11 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
         Log.d(TAG, "On resume");
         super.onResume();
         ActionBar ab =((AppCompatActivity) getActivity()).getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
-        ab.setDisplayShowHomeEnabled(true);
+        if(ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+            ab.setDisplayShowHomeEnabled(true);
+        }
+        Log.e(TAG, "Action bar can not be obtained - home can not be set !!!");
     }
 
     @Override

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes.items;
 
 import java.util.List;
@@ -6,11 +10,49 @@ import java.util.List;
  * Created by Anna on 2016-02-24.
  */
 public abstract class AbstractNote  implements INote {
+
+    private class SimpleItemsIterator implements Iterator {
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public INoteItem next() {
+            return null;
+        }
+
+        @Override
+        public int getItemsNumber() {
+            return getSimpleItemsNumber();
+        }
+    }
+
+    private class ItemsIterator implements Iterator {
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public INoteItem next() {
+            return null;
+        }
+
+        @Override
+        public int getItemsNumber() {
+            return getSize();
+        }
+    }
+
     private static final String TAG = "Note:AbstractNote";
     private static int HEADER_POSITION = 0;
 
     private int id;
     private int order;
+    private int simpleItems;
 
     protected List<INoteItem> items;
 
@@ -33,6 +75,14 @@ public abstract class AbstractNote  implements INote {
         this.id = id;
     }
 
+    public int getSimpleItemsNumber() {
+        return simpleItems;
+    }
+
+    private void countSimpleItems() {
+        ++simpleItems;
+    }
+
     @Override
     public int getListOrder(){
         return order;
@@ -43,6 +93,13 @@ public abstract class AbstractNote  implements INote {
         this.order = order;
     }
 
+
+    protected void addItem(INoteItem item) {
+        if(item.isSimple()) {
+            countSimpleItems();
+        }
+        items.add(item);
+    }
 
     protected List<INoteItem> getItems() {
         return items;
@@ -82,5 +139,15 @@ public abstract class AbstractNote  implements INote {
     @Override
     public int getSize() {
         return getItems().size();
+    }
+
+    @Override
+    public Iterator getSimpleItemsIterator() {
+        return new SimpleItemsIterator();
+    }
+
+    @Override
+    public Iterator getItemsIterator() {
+        return new ItemsIterator();
     }
 }

@@ -12,4 +12,9 @@ public class ItemSeparator implements INoteItem {
     public String toString() {
         return "ItemSeparator{}";
     }
+
+    @Override
+    public boolean isSimple() {
+        return false;
+    }
 }

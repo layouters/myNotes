@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes;
 
 import android.content.Context;
@@ -11,7 +15,7 @@ import android.view.ViewGroup;
  */
 public class MyLinearLayoutManager extends LinearLayoutManager {
 
-    public MyLinearLayoutManager(Context context, int orientation, boolean reverseLayout)    {
+    public MyLinearLayoutManager(Context context, int orientation, boolean reverseLayout) {
         super(context, orientation, reverseLayout);
     }
 

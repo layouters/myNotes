@@ -12,4 +12,9 @@ public class ItemReminder implements INoteItem {
     public String toString() {
         return "ItemReminder{}";
     }
+
+    @Override
+    public boolean isSimple() {
+        return false;
+    }
 }

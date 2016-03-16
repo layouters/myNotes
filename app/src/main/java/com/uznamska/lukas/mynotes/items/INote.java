@@ -26,4 +26,7 @@ public interface INote {
 
     void move(int fromPosition, int toPosition);
     public int addElement(INoteItem item);
+
+    Iterator getSimpleItemsIterator();
+    Iterator getItemsIterator();
 }

@@ -14,23 +14,55 @@ import java.util.Collections;
  */
 public class ListNote extends AbstractNote implements INoteForList {
 
+    private class ListItemIterator implements Iterator {
+
+        int index = 1;
+        int lastIndex = getLastListItemPosition();
+
+        @Override
+        public boolean hasNext() {
+            return index < lastIndex;
+        }
+
+        @Override
+        public INoteItem next() {
+            if(this.hasNext()) {
+                return getItems().get(index++);
+            }
+            return null;
+        }
+
+        @Override
+        public int getItemsNumber() {
+            return lastIndex - index;
+        }
+    }
+
     private static final String TAG = "Note:ListNote";
 
     public ListNote() {
         setItems(new ArrayList<INoteItem>());
-        getItems().add(new Header());
-        getItems().add(new ListItem());
-        getItems().add(new ItemAdder());
-        getItems().add(new ItemSeparator());
-        getItems().add(new ItemReminder());
+        addItem(new Header());
+        addItem(new ListItem());
+        addItem(new ItemAdder());
+        addItem(new ItemSeparator());
+        addItem(new ItemReminder());
+    }
+
+    public Iterator getListIterator() {
+        return new ListItemIterator();
     }
 
     private int getFirstListIndex() {
         return 1;
     }
 
-    private int getLastListIndex() {
-        return getSize() - 3;
+    private int getLastListItemPosition() {
+        int start  = getItems().size() - 1;
+        while(!(getItems().get(start) instanceof ListItem)) {
+            --start;
+        }
+        return start;
     }
 
     @Override
@@ -71,7 +103,7 @@ public class ListNote extends AbstractNote implements INoteForList {
 
     @Override
     public void move(int fromPosition, int toPosition) {
-        toPosition = Math.max(getLastListIndex() ,toPosition);
+        toPosition = Math.max(getLastListItemPosition() ,toPosition);
         toPosition = Math.min(getFirstListIndex() , toPosition);
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
@@ -84,7 +116,6 @@ public class ListNote extends AbstractNote implements INoteForList {
                 Collections.swap(getItems(), i, i - 1);
             }
         }
-
     }
 
     @Override
@@ -94,7 +125,7 @@ public class ListNote extends AbstractNote implements INoteForList {
 
     @Override
     public int addElement(INoteItem item) {
-        getItems().add(item);
+        addItem(item);
         int jumps = moveAboveAdder();
         return getItems().size() - jumps;
     }
@@ -108,10 +139,10 @@ public class ListNote extends AbstractNote implements INoteForList {
         int start = getItems().size() - 1;
         for(int i = start; i > 0; i-- ) {
             if(getItems().get(i-1) instanceof ItemAdder) {
-                swapitems(i, i - 1, jumps++);
+                swapitems(i, i - 1, jumps ++);
                 break;
             }
-            swapitems(i, i - 1, jumps++);
+            swapitems(i, i - 1, jumps ++);
         }
         return jumps + 1;
     }

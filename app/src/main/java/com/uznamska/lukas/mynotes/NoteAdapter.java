@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes;
 
 import android.content.Context;
@@ -49,7 +53,11 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         public abstract  RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType);
 
-        public abstract void onBindViewHolder(RecyclerView.ViewHolder holder, final int position);
+        public  void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+            if(holder != null) {
+                ((IBindActionTaker) holder).onBindViewHolder(position);
+            }
+        }
 
         public int getItemViewType(int position){
 
@@ -95,16 +103,11 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-
-        }
-
-        @Override
         public int getItemCount() {
             Log.d(TAG, "this is size in  rich mode" + mNote.getSize());
             Log.d(TAG, "this is note in  rich mode" + mNote);
 
-            return mNote.getSize();
+            return mNote.getItemsIterator().getItemsNumber();
         }
 
         @Override
@@ -174,21 +177,8 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-
-        }
-
-        @Override
         public int getItemCount() {
-            if(mNote.hasList()) {
-                //Remove adder in simplified mode
-                if( mNote.getTitle()== null && mNote.getText().isEmpty())  {
-                    //return mNote.getSize() - 2;
-                    mOverhead = 4;
-                }
-                return mNote.getSize() - mOverhead;
-            }
-            return mNote.getSize()-2;
+            return mNote.getSimpleItemsIterator().getItemsNumber();
         }
 
         @Override
@@ -364,12 +354,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-//        if(mOverhead == 4) {
-//            position += 1;
-//        }
-        if(holder != null) {
-            ((IBindActionTaker) holder).onBindViewHolder(position);
-        }
+        getDisplayMode().onBindViewHolder(holder, position);
     }
 
     @Override

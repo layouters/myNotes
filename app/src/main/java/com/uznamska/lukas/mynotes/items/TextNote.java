@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes.items;
 
 
@@ -9,21 +13,16 @@ import com.uznamska.lukas.mynotes.database.NotesTable;
 
 import java.util.ArrayList;
 
-/**
- * Created by Anna on 2016-02-23.
- */
 public class TextNote extends AbstractNote implements INote {
     private static final String TAG = "TextNote";
     private static int HEADER_POSITION = 0;
 
     public TextNote() {
         setItems(new ArrayList<INoteItem>());
-        getItems().add(new Header());
-        getItems().add(new ItemSeparator());
-        getItems().add(new ItemReminder());
+        addItem(new Header());
+        addItem(new ItemSeparator());
+        addItem(new ItemReminder());
     }
-
-
 
     @Override
     public boolean hasList() {

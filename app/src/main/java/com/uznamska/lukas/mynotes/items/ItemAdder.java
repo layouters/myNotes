@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes.items;
 
 /**
@@ -7,5 +11,10 @@ public class ItemAdder implements INoteItem {
     @Override
     public String toString() {
         return "ItemAdder{}";
+    }
+
+    @Override
+    public boolean isSimple() {
+        return false;
     }
 }

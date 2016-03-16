@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes.items;
 
 /**
@@ -30,5 +34,10 @@ public class Header  implements INoteItem {
 
     public String getText() {
         return text;
+    }
+
+    @Override
+    public boolean isSimple() {
+        return true;
     }
 }
