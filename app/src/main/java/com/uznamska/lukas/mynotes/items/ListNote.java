@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes.items;
 
 import android.util.Log;
@@ -91,14 +95,25 @@ public class ListNote extends AbstractNote implements INoteForList {
     @Override
     public int addElement(INoteItem item) {
         getItems().add(item);
-        moveAboveAdder();
-
-        return getItems().size() - 4;
+        int jumps = moveAboveAdder();
+        return getItems().size() - jumps;
     }
-    private void moveAboveAdder() {
-        Collections.swap(getItems(), getItems().size() - 1, getItems().size() - 2);
-        Collections.swap(getItems(), getItems().size() - 2, getItems().size() - 3);
-        Collections.swap(getItems(), getItems().size() - 3, getItems().size() - 4);
+
+    private void swapitems(int swappedUp, int swappedDown, int jump ) {
+        Collections.swap(getItems(), swappedUp, swappedDown);
+    }
+
+    private int moveAboveAdder() {
+        int jumps = 0;
+        int start = getItems().size() - 1;
+        for(int i = start; i > 0; i-- ) {
+            if(getItems().get(i-1) instanceof ItemAdder) {
+                swapitems(i, i - 1, jumps++);
+                break;
+            }
+            swapitems(i, i - 1, jumps++);
+        }
+        return jumps + 1;
     }
 
     @Override
