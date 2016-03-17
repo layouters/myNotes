@@ -4,9 +4,6 @@
 
 package com.uznamska.lukas.mynotes.items;
 
-/**
- * Created by Anna on 2016-02-24.
- */
 public interface INote {
     INoteItem getItem(int pos);
     void setTitle(String title);
@@ -30,6 +27,10 @@ public interface INote {
     Iterator getSimpleItemsIterator();
     Iterator getItemsIterator();
 
-    String getDateReminder();
-    void setDateReminder(String reminder);
+//    String getDateReminder();
+//    void setDateReminder(String reminder);
+
+    IReminder getReminder();
+    void setReminder(IReminder reminder);
 }
+

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes.contentprovider;
 
 import android.content.ContentProvider;
@@ -16,6 +20,7 @@ import android.util.Log;
 import com.uznamska.lukas.mynotes.database.ListItemTable;
 import com.uznamska.lukas.mynotes.database.NotesDatabaseHelper;
 import com.uznamska.lukas.mynotes.database.NotesTable;
+import com.uznamska.lukas.mynotes.database.ReminderItemTable;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -37,17 +42,24 @@ public class NotesContentProvider extends ContentProvider {
     private static final int ITEMS_ID = 40;
     private static final int NOTE_ITEMS = 50;
     private static final int NOTE_ITEMS_ID = 60;
+    private static final int REMINDER_ITEMS = 70;
 
     private static final String AUTHORITY = "com.uznamska.lukas.mynotes.contentprovider";
     private static final String NOTES_BASE_PATH = NotesTable.TABLE_NOTES;
     private static final String ITEM_BASE_PATH = ListItemTable.TABLE_LISTITEM;
+    private static final String REMINDER_BASE_PATH = ReminderItemTable.TABLE_REMINDERITEMS;
+
     public static final Uri NOTES_CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + NOTES_BASE_PATH);
     public static final Uri LIST_CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + ITEM_BASE_PATH);
+    public static final Uri REMINDER_CONTENT_URI = Uri.parse("content://" + AUTHORITY
+            + "/" + REMINDER_BASE_PATH);
+    //lists + note JOIN TABLES
     public static final Uri LIST_NOTES_CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + "listnote");
-    //noteUri = Uri.parse(NotesContentProvider.NOTES_CONTENT_URI + "/" + index);
+
+
     public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
             + "/notes";
 
@@ -62,6 +74,7 @@ public class NotesContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, ITEM_BASE_PATH + "/#", ITEMS_ID);
         sURIMatcher.addURI(AUTHORITY, "listnote", NOTE_ITEMS);
         sURIMatcher.addURI(AUTHORITY, "listnote" + "/#", NOTE_ITEMS_ID);
+        sURIMatcher.addURI(AUTHORITY, REMINDER_BASE_PATH, REMINDER_ITEMS);
     }
 
 
@@ -99,14 +112,23 @@ public class NotesContentProvider extends ContentProvider {
                 Log.d(TAG, "notes_id " + uri.toString());
                 break;
             case NOTE_ITEMS:
-                queryBuilder.setTables(ListItemTable.TABLE_LISTITEM//empl
+                queryBuilder.setTables(ListItemTable.TABLE_LISTITEM
                         + " INNER JOIN "
-                        +  NotesTable.TABLE_NOTES //dep table
+                        +  NotesTable.TABLE_NOTES
                         + " ON "
                         + ListItemTable.NOTE_ID
                         + " = "
                         + (NotesTable.TABLE_NOTES + "." + NotesTable.COLUMN_ID));
                 break;
+            case REMINDER_ITEMS:
+                queryBuilder.setTables(ReminderItemTable.TABLE_REMINDERITEMS
+                        + " INNER JOIN "
+                        +  NotesTable.TABLE_NOTES
+                        + " ON "
+                        + ReminderItemTable.NOTE_ID
+                        + " = "
+                        + (NotesTable.TABLE_NOTES + "." + NotesTable.COLUMN_ID));
+               break;
 
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -129,6 +151,7 @@ public class NotesContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        Log.d(TAG, "Insert item uri: " + uri);
         int uriType = sURIMatcher.match(uri);
         Uri _uri = null;
         SQLiteDatabase sqlDB = database.getWritableDatabase();
@@ -146,6 +169,13 @@ public class NotesContentProvider extends ContentProvider {
                 id = sqlDB.insert(ListItemTable.TABLE_LISTITEM, null, values);
                 if (id > 0) {
                     _uri = ContentUris.withAppendedId(LIST_CONTENT_URI, id);
+                    getContext().getContentResolver().notifyChange(_uri, null);
+                }
+                break;
+            case REMINDER_ITEMS:
+                id = sqlDB.insert(ReminderItemTable.TABLE_REMINDERITEMS, null, values);
+                if (id > 0) {
+                    _uri = ContentUris.withAppendedId(REMINDER_CONTENT_URI, id);
                     getContext().getContentResolver().notifyChange(_uri, null);
                 }
                 break;

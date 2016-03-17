@@ -11,8 +11,6 @@ import java.util.List;
  */
 public abstract class AbstractNote  implements INote {
 
-    private String mDateReminder = "";
-
     private class SimpleItemsIterator implements Iterator {
 
         @Override
@@ -49,12 +47,49 @@ public abstract class AbstractNote  implements INote {
         }
     }
 
+    class NoteReminder implements  IReminder {
+        String date;
+        String repeat;
+        boolean mIsSet = false;
+
+        @Override
+        public String getDate() {
+            return date;
+        }
+
+        @Override
+        public void setDate(String date) {
+            this.date = date;
+        }
+
+        @Override
+        public String getRepeat() {
+            return repeat;
+        }
+
+        @Override
+        public boolean isSet() {
+            return mIsSet;
+        }
+
+        @Override
+        public void set(boolean isSet) {
+            mIsSet = isSet;
+        }
+
+        @Override
+        public void setRepeat(String repeat) {
+            this.repeat = repeat;
+        }
+    }
+
     private static final String TAG = "Note:AbstractNote";
     private static int HEADER_POSITION = 0;
 
     private int id;
     private int order;
     private int simpleItems;
+    private IReminder mReminder;
 
     protected List<INoteItem> items;
 
@@ -153,12 +188,15 @@ public abstract class AbstractNote  implements INote {
     }
 
     @Override
-    public String getDateReminder() {
-        return mDateReminder;
+    public IReminder getReminder() {
+        if(mReminder == null) {
+            mReminder = new NoteReminder();
+        }
+        return mReminder;
     }
 
     @Override
-    public void setDateReminder(String reminder) {
-        this.mDateReminder = reminder;
+    public void setReminder(IReminder reminder) {
+        mReminder = reminder;
     }
 }

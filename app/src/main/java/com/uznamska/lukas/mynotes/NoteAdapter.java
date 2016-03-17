@@ -4,6 +4,8 @@
 
 package com.uznamska.lukas.mynotes;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -12,10 +14,12 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,12 +27,14 @@ import com.uznamska.lukas.mynotes.items.Header;
 import com.uznamska.lukas.mynotes.items.IBindActionTaker;
 import com.uznamska.lukas.mynotes.items.INote;
 import com.uznamska.lukas.mynotes.items.INoteItem;
+import com.uznamska.lukas.mynotes.items.IReminder;
 import com.uznamska.lukas.mynotes.items.ItemAdder;
 import com.uznamska.lukas.mynotes.items.ItemReminder;
 import com.uznamska.lukas.mynotes.items.ItemSeparator;
 import com.uznamska.lukas.mynotes.items.ListItem;
 import com.uznamska.lukas.mynotes.items.ListNote;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +42,9 @@ import java.util.Map;
  * Created by Lukasz on 2016-02-21.
  */
 public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
-        implements CardItemTouchHelper.ItemTouchHelperAdapter,View.OnClickListener {
+                        implements CardItemTouchHelper.ItemTouchHelperAdapter,
+                        View.OnClickListener,
+                        PopupMenu.OnMenuItemClickListener {
     private static final String TAG = "Note:NoteAdapter";
     private final Context mContext;
     private final int HEADER_ELEMENT_TYPE = 0;
@@ -46,9 +54,62 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private final int ITEM_SEPARATOR = 4;
     HolderAbstractFactory factoryHolder;
     int mOverhead = 3;
+    private int mYear;
+    private int mMonth;
+    private int mDay;
 
     PresentationMode mDisplayMode;
     INote mNote;
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.date_setter:
+                showDatePicker();
+                return true;
+            case R.id.location_setter:
+                showLocationPicker();
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void  showDatePicker() {
+        // get the current date
+        final Calendar c = Calendar.getInstance();
+        mYear = c.get(Calendar.YEAR);
+        mMonth = c.get(Calendar.MONTH);
+        mDay = c.get(Calendar.DAY_OF_MONTH);
+        Log.d(TAG, "Date set");
+        Dialog datePickerDialog = new DatePickerDialog(mContext, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                mYear = year;
+                mMonth = monthOfYear;
+                mDay = dayOfMonth;
+                updateDisplay();
+            }
+        }, mYear, mMonth, mDay);
+        datePickerDialog.show();
+    }
+
+    private void updateDisplay() {
+
+      IReminder reminder = mNote.getReminder();
+        reminder.setDate(
+                new StringBuilder()
+                        // Month is 0 based so add 1
+                        .append(mMonth + 1).append("-")
+                        .append(mDay).append("-")
+                        .append(mYear).append(" ").toString());
+        reminder.set(true);
+        notifyDataSetChanged();
+    }
+
+    private void showLocationPicker() {
+        Log.d(TAG,"Location set");
+    }
 
     enum DisplayMode {
         RICH_MODE,
@@ -154,10 +215,14 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 ReminderViewHolder tmpHolder = (ReminderViewHolder)holder;
                 Log.d(TAG, "Reminder clicked| view id:  " + tmpHolder.itemView.getId());
                 PopupMenu popup = new PopupMenu(mContext, tmpHolder.itemView);
+                popup.setOnMenuItemClickListener(NoteAdapter.this);
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.reminder_type_menu, popup.getMenu());
                 popup.show();
-                mNote.setDateReminder("Dupa");
+
+
+
+               // mNote.setDateReminder("Dupa");
                 notifyDataSetChanged();
             }
         }
@@ -381,7 +446,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public void onBindViewHolder(int position) {
-            dateItem.setText(mNote.getDateReminder());
+            dateItem.setText(mNote.getReminder().getDate());
         }
 
         @Override
