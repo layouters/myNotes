@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2016.  Lukasz Fiszer
+  -->
+
 <resources>
     <string name="app_name">MyNotes</string>
 
@@ -17,4 +21,6 @@
     <string name="edit_msg_text">Text</string>
     <string name="edit_todo">Edit element</string>
     <string name="list_item">List item</string>
+    <string name="set_date">Set date</string>
+    <string name="set_location">Set location</string>
 </resources>

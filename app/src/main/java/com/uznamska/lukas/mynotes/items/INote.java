@@ -29,4 +29,7 @@ public interface INote {
 
     Iterator getSimpleItemsIterator();
     Iterator getItemsIterator();
+
+    String getDateReminder();
+    void setDateReminder(String reminder);
 }

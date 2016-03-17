@@ -11,6 +11,8 @@ import java.util.List;
  */
 public abstract class AbstractNote  implements INote {
 
+    private String mDateReminder = "";
+
     private class SimpleItemsIterator implements Iterator {
 
         @Override
@@ -119,7 +121,6 @@ public abstract class AbstractNote  implements INote {
     @Override
     public void setTitle(String title) {
         ((Header) items.get(HEADER_POSITION)).setTitle(title);
-
     }
 
     @Override
@@ -149,5 +150,15 @@ public abstract class AbstractNote  implements INote {
     @Override
     public Iterator getItemsIterator() {
         return new ItemsIterator();
+    }
+
+    @Override
+    public String getDateReminder() {
+        return mDateReminder;
+    }
+
+    @Override
+    public void setDateReminder(String reminder) {
+        this.mDateReminder = reminder;
     }
 }

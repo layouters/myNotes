@@ -9,9 +9,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/**
- * Created by Anna on 2016-02-23.
- */
 public class ListNote extends AbstractNote implements INoteForList {
 
     private class ListItemIterator implements Iterator {

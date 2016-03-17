@@ -5,11 +5,13 @@
 package com.uznamska.lukas.mynotes;
 
 import android.content.Context;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -20,11 +22,15 @@ import android.widget.TextView;
 import com.uznamska.lukas.mynotes.items.Header;
 import com.uznamska.lukas.mynotes.items.IBindActionTaker;
 import com.uznamska.lukas.mynotes.items.INote;
+import com.uznamska.lukas.mynotes.items.INoteItem;
 import com.uznamska.lukas.mynotes.items.ItemAdder;
 import com.uznamska.lukas.mynotes.items.ItemReminder;
 import com.uznamska.lukas.mynotes.items.ItemSeparator;
 import com.uznamska.lukas.mynotes.items.ListItem;
 import com.uznamska.lukas.mynotes.items.ListNote;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Lukasz on 2016-02-21.
@@ -49,9 +55,22 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         SIMPLIFIED_MODE
     }
 
-    abstract class PresentationMode {
+    Map<Integer, INoteItem> resourceLayoutMap;
 
-        public abstract  RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType);
+    abstract class PresentationMode {
+        public PresentationMode() {
+            resourceLayoutMap = new HashMap<>();
+        }
+
+        public  RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            IBindActionTaker viewHolder = (IBindActionTaker)factoryHolder.getHolderOfType(parent, viewType);
+            if(viewHolder != null) {
+                viewHolder.setViewClickListener(NoteAdapter.this);
+                return (RecyclerView.ViewHolder) viewHolder;
+            }
+            Log.e(TAG, "Holder is null, thats an error viecType: " + viewType );
+            return null;
+        }
 
         public  void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
             if(holder != null) {
@@ -59,24 +78,28 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             }
         }
 
-        public int getItemViewType(int position){
-
+        public int getItemViewType(int position) {
             Log.d(TAG, "ItemViewType: " + position);
             INote note = mNote;
-            if(note.getItem(position) instanceof Header){
+            if(note.getItem(position) instanceof Header) {
                 Log.d(TAG, "ItemViewType instance of header");
+                resourceLayoutMap.put(HEADER_ELEMENT_TYPE, note.getItem(position));
                 return HEADER_ELEMENT_TYPE;
             } else if(note.getItem(position) instanceof ItemAdder){
                 Log.d(TAG, "ItemViewType instance of adder");
+                resourceLayoutMap.put(ADDER_ELEMENT_TYPE, note.getItem(position));
                 return ADDER_ELEMENT_TYPE;
             } else if(note.getItem(position) instanceof ListItem) {
-                Log.d(TAG, "ItemViewType instance of listiten");
+                Log.d(TAG, "ItemViewType instance of listiten");/////////////////
+                resourceLayoutMap.put(LIST_ELEMENT_TYPE, note.getItem(position));
                 return LIST_ELEMENT_TYPE;
             } else if(note.getItem(position) instanceof ItemSeparator) {
-                Log.d(TAG, "ItemViewType instance of separatoe");
+                Log.d(TAG, "ItemViewType instance of separator");
+                resourceLayoutMap.put(ITEM_SEPARATOR, note.getItem(position));
                 return ITEM_SEPARATOR;
             } else if(note.getItem(position) instanceof ItemReminder) {
                 Log.d(TAG, "ItemViewType instance of remninder");
+                resourceLayoutMap.put(ITEM_REMINDER, note.getItem(position));
                 return ITEM_REMINDER;
             }
             return -1;
@@ -98,15 +121,9 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return null;
-        }
-
-        @Override
         public int getItemCount() {
             Log.d(TAG, "this is size in  rich mode" + mNote.getSize());
             Log.d(TAG, "this is note in  rich mode" + mNote);
-
             return mNote.getItemsIterator().getItemsNumber();
         }
 
@@ -133,6 +150,15 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 int pos = mNote.addElement(new ListItem());
                 Log.d(TAG, "Position inserted " + pos);
                 notifyItemInserted(pos);
+            } else if(holder instanceof ReminderViewHolder) {
+                ReminderViewHolder tmpHolder = (ReminderViewHolder)holder;
+                Log.d(TAG, "Reminder clicked| view id:  " + tmpHolder.itemView.getId());
+                PopupMenu popup = new PopupMenu(mContext, tmpHolder.itemView);
+                MenuInflater inflater = popup.getMenuInflater();
+                inflater.inflate(R.menu.reminder_type_menu, popup.getMenu());
+                popup.show();
+                mNote.setDateReminder("Dupa");
+                notifyDataSetChanged();
             }
         }
     }
@@ -140,40 +166,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     class SimplifiedMode extends PresentationMode {
         public SimplifiedMode() {
             factoryHolder = new SimplifiedHolderFactory();
-        }
-
-        public int getItemViewType(int position){
-           if( mNote.hasList() && mNote.getTitle()== null && mNote.getText().isEmpty()) {
-               return LIST_ELEMENT_TYPE;
-           }
-//            else if(mOverhead == 2) {
-//                position +=1;
-//            }
-
-            Log.d(TAG, "SimplifiedMode: " + position + " text " + mNote.getTitle());
-            INote note = mNote;
-            if(note.getItem(position) instanceof Header){
-                Log.d(TAG, "ItemViewType instance of header");
-                return HEADER_ELEMENT_TYPE;
-            } else if(note.getItem(position) instanceof ItemAdder){
-                Log.d(TAG, "ItemViewType instance of adder");
-                return ADDER_ELEMENT_TYPE;
-            } else if(note.getItem(position) instanceof ListItem) {
-                Log.d(TAG, "ItemViewType instance of listiten");
-                return LIST_ELEMENT_TYPE;
-            } else if(note.getItem(position) instanceof ItemSeparator) {
-                Log.d(TAG, "ItemSeparator");
-                return ITEM_SEPARATOR;
-            } else if(note.getItem(position) instanceof ItemReminder) {
-                Log.d(TAG, "ItemReminder instance of ItemReminder");
-                return ITEM_REMINDER;
-            }
-            return -1;
-        }
-
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return null;
         }
 
         @Override
@@ -201,7 +193,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 Log.d(TAG, "SimplifiedHeaderViewHolder list has been clicked | view id:  " +
                         tmpHolder.getLayoutPosition());
             }
-
         }
     }
 
@@ -269,6 +260,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
     }
+
     class RichHolderFactory extends HolderAbstractFactory {
 
         @Override
@@ -343,13 +335,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        IBindActionTaker viewHolder = (IBindActionTaker)factoryHolder.getHolderOfType(parent, viewType);
-        if(viewHolder != null) {
-            viewHolder.setViewClickListener(this);
-            return (RecyclerView.ViewHolder) viewHolder;
-        }
-        Log.e(TAG, "Holder is null, thats an error viecType: " + viewType );
-        return null;
+        return getDisplayMode().onCreateViewHolder(parent, viewType);
     }
 
     @Override
@@ -386,19 +372,23 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public class ReminderViewHolder extends RecyclerView.ViewHolder implements IMovementInformator,
             IBindActionTaker {
 
+        private final TextView dateItem;
 
         public ReminderViewHolder(View itemView) {
             super(itemView);
+            dateItem = (TextView) itemView.findViewById(R.id.text_reminder_date);
         }
 
         @Override
         public void onBindViewHolder(int position) {
-
+            dateItem.setText(mNote.getDateReminder());
         }
 
         @Override
         public void setViewClickListener(View.OnClickListener listener) {
-
+            Log.d(TAG, "Listener added to ReminderViewHolder");
+            itemView.setOnClickListener(listener);
+            itemView.setTag(this);
         }
 
         @Override
@@ -495,7 +485,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             });
             this.text.setText(mNote.getText());
         }
-
     }
 
     public class SimplifiedHeaderViewHolder extends AbstractHeaderHolder {
@@ -518,9 +507,9 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     public class ListItemViewHolder extends RecyclerView.ViewHolder implements IMovementInformator,
-            IBindActionTaker {
-        TextView textItem;
-        CheckBox ticked;
+                IBindActionTaker {
+            TextView textItem;
+            CheckBox ticked;
         public ListItemViewHolder(View itemView) {
             super(itemView);
             textItem = (TextView) itemView.findViewById(R.id.edit_msg_text);
