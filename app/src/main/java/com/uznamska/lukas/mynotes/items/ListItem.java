@@ -7,7 +7,7 @@ package com.uznamska.lukas.mynotes.items;
 /**
  * Created by Anna on 2016-02-24.
  */
-public class ListItem implements INoteItem {
+public class ListItem extends AbstractNoteItem {
     String  text;
     boolean ticked;
 

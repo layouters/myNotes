@@ -23,6 +23,7 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.uznamska.lukas.mynotes.contentprovider.NotesContentProviderProxy;
 import com.uznamska.lukas.mynotes.items.Header;
 import com.uznamska.lukas.mynotes.items.IBindActionTaker;
 import com.uznamska.lukas.mynotes.items.INote;
@@ -60,6 +61,12 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     PresentationMode mDisplayMode;
     INote mNote;
+    NotesContentProviderProxy proxyContentProvider;
+
+    enum EditorType {
+        EDIT,
+        NEW
+    }
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
@@ -119,6 +126,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     Map<Integer, INoteItem> resourceLayoutMap;
 
     abstract class PresentationMode {
+
         public PresentationMode() {
             resourceLayoutMap = new HashMap<>();
         }
@@ -129,7 +137,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 viewHolder.setViewClickListener(NoteAdapter.this);
                 return (RecyclerView.ViewHolder) viewHolder;
             }
-            Log.e(TAG, "Holder is null, thats an error viecType: " + viewType );
+            Log.e(TAG, "Holder is null, thats an error viewType: " + viewType );
             return null;
         }
 
@@ -176,9 +184,11 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     class RichMode extends PresentationMode {
+        EditorType mEdit;
 
-        public RichMode() {
+        public RichMode(EditorType edit) {
             factoryHolder = new RichHolderFactory();
+            mEdit = edit;
         }
 
         @Override
@@ -198,7 +208,10 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public void onItemDismiss(int position) {
-
+            Log.d(TAG, "item deleted pos: " + position);
+            if(mEdit == EditorType.EDIT) {
+                Log.d(TAG, "Delete also from database pos: " + position);
+            }
         }
 
         @Override
@@ -208,9 +221,17 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             if(holder instanceof AdderItemViewHolder) {
                 AdderItemViewHolder tmpHolder = (AdderItemViewHolder)holder;
                 Log.d(TAG, "Adder list has been clicked | view id:  " + tmpHolder.itemView.getId());
+                int iditem = -1;
+                ListItem emptyItem = new ListItem();
+                if(mEdit == EditorType.EDIT) {
+                    Log.d(TAG, "Add empty list element to database");
+                    iditem = proxyContentProvider.saveListItem(mNote);
+                    emptyItem.setId(iditem);
+                }
                 int pos = mNote.addElement(new ListItem());
                 Log.d(TAG, "Position inserted " + pos);
                 notifyItemInserted(pos);
+
             } else if(holder instanceof ReminderViewHolder) {
                 ReminderViewHolder tmpHolder = (ReminderViewHolder)holder;
                 Log.d(TAG, "Reminder clicked| view id:  " + tmpHolder.itemView.getId());
@@ -219,9 +240,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.reminder_type_menu, popup.getMenu());
                 popup.show();
-
-
-
                // mNote.setDateReminder("Dupa");
                 notifyDataSetChanged();
             }
@@ -372,22 +390,24 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
    //Class NoteAdapter starts here
-    NoteAdapter(INote note, Context context) {
+    NoteAdapter(INote note, Context context, EditorType edit) {
         mContext = context;
         mNote = note;
-        setDisplayMode(new RichMode());
+        setDisplayMode(new RichMode(edit));
+        proxyContentProvider = new NotesContentProviderProxy(mContext);
     }
 
-    NoteAdapter(INote note, Context context, DisplayMode mode) {
+    NoteAdapter(INote note, Context context, DisplayMode mode, EditorType edit) {
         mContext = context;
         mNote = note;
         if(mode == DisplayMode.RICH_MODE) {
-            setDisplayMode(new RichMode());
+            setDisplayMode(new RichMode(edit));
         } else if (mode == DisplayMode.SIMPLIFIED_MODE) {
             setDisplayMode(new SimplifiedMode());
         } else {
             Log.e(TAG, "Unsupported Display mode");
         }
+        proxyContentProvider = new NotesContentProviderProxy(mContext);
     }
 
     public PresentationMode getDisplayMode() {
@@ -427,6 +447,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void onItemDismiss(int position) {
         Log.d(TAG, "delete "+ position);
         //mNoteBuilder.removeElement(position);
+        getDisplayMode().onItemDismiss(position);
     }
 
     @Override

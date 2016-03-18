@@ -9,4 +9,6 @@ package com.uznamska.lukas.mynotes.items;
  */
 public interface INoteItem {
     boolean isSimple();
+    int getId();
+    void setId(int id);
 }

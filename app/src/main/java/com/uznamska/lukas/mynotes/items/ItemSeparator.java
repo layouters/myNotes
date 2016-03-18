@@ -7,7 +7,7 @@ package com.uznamska.lukas.mynotes.items;
 /**
  * Created by Anna on 2016-03-14.
  */
-public class ItemSeparator implements INoteItem {
+public class ItemSeparator extends AbstractNoteItem {
     @Override
     public String toString() {
         return "ItemSeparator{}";

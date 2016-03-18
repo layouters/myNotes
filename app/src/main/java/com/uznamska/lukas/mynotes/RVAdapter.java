@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes;
 
 import android.content.Context;
@@ -131,7 +135,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.CardListingViewHol
         cardListingViewHolder.mRecycleView.setLayoutManager(mLinearLayoutManager);
         //adapterList.addAll(listItem);
         mAdapter = new NoteAdapter(mNote.get(i), mContext,
-                NoteAdapter.DisplayMode.SIMPLIFIED_MODE);
+                NoteAdapter.DisplayMode.SIMPLIFIED_MODE, NoteAdapter.EditorType.NEW);
         cardListingViewHolder.mRecycleView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
     }

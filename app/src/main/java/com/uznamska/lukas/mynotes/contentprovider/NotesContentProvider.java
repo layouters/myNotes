@@ -25,9 +25,6 @@ import com.uznamska.lukas.mynotes.database.ReminderItemTable;
 import java.util.Arrays;
 import java.util.HashSet;
 
-/**
- * Created by Anna on 2016-03-06.
- */
 public class NotesContentProvider extends ContentProvider {
     private static final String TAG = "Note:Content";
     // database
@@ -212,6 +209,17 @@ public class NotesContentProvider extends ContentProvider {
             case ITEMS:
                 break;
             case ITEMS_ID:
+                String itemid = uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    rowsDeleted = sqlDB.delete(ListItemTable.TABLE_LISTITEM,
+                            ListItemTable.COLUMN_ID + "=" + itemid,
+                            null);
+                } else {
+                    rowsDeleted = sqlDB.delete(ListItemTable.TABLE_LISTITEM,
+                            ListItemTable.COLUMN_ID + "=" + itemid
+                                    + " and " + selection,
+                            selectionArgs);
+                }
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);

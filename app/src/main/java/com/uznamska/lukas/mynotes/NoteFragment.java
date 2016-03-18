@@ -29,6 +29,7 @@ import com.uznamska.lukas.mynotes.contentprovider.NotesContentProvider;
 import com.uznamska.lukas.mynotes.contentprovider.NotesContentProviderProxy;
 import com.uznamska.lukas.mynotes.database.NotesTable;
 import com.uznamska.lukas.mynotes.items.INote;
+import com.uznamska.lukas.mynotes.items.INoteItem;
 import com.uznamska.lukas.mynotes.items.ListNote;
 import com.uznamska.lukas.mynotes.items.NoteFactory;
 import com.uznamska.lukas.mynotes.items.TextNote;
@@ -93,25 +94,38 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
         ActionBar mActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
                 Bundle b = getActivity().getIntent().getExtras();
 
+        NoteAdapter.EditorType editType = NoteAdapter.EditorType.NEW;
         if(noteUri == null) {
             mNote = factory.getNote(mNoteType);
+            editType = NoteAdapter.EditorType.NEW;
         } else {
             mNote = proxyContentProvider.getNoteFromUri(noteUri);
+            editType = NoteAdapter.EditorType.EDIT;
             Log.d(TAG, "Note from uri " + mNote);
         }
         Log.d(TAG, "Note from uri " + mNote);
         syncToolbar(b);
         View rootView = inflater.inflate(R.layout.recycle_view_frag, container, false);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
+//        mRecyclerView.addOnItemTouchListener(
+//                new RecyclerItemClickListener(this.getContext(), new RecyclerItemClickListener.OnItemClickListener() {
+//                    @Override public void onItemClick(View view, int position) {
+//                        //int id = mNotesList.get(position).getId();
+//                        //onCardClicked(id);
+//                        INoteItem item = mNote.getItem(position);
+//                        Log.d(TAG, item + " has been clicked");
+//                    }
+//                })
+//        );
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new NoteAdapter(mNote, this.getContext());
+        mAdapter = new NoteAdapter(mNote, this.getContext(),editType);
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
-//        ItemTouchHelper.Callback callback =
-//                new CardItemTouchHelper(mAdapter);
-//        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-//        touchHelper.attachToRecyclerView(mRecyclerView);
+        ItemTouchHelper.Callback callback =
+                new CardItemTouchHelper(mAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(mRecyclerView);
         return rootView;
     }
 
