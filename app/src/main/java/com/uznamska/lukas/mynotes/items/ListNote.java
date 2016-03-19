@@ -146,7 +146,7 @@ public class ListNote extends AbstractNote implements INoteForList {
 
     @Override
     public void removeListElement(int pos) {
-
+        removeItem(pos);
     }
 
     @Override

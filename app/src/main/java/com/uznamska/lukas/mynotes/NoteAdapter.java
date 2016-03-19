@@ -210,8 +210,11 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public void onItemDismiss(int position) {
             Log.d(TAG, "item deleted pos: " + position);
             if(mEdit == EditorType.EDIT) {
-                Log.d(TAG, "Delete also from database pos: " + position);
+                Log.d(TAG, "Delete also from database pos: " + position + " " + mNote.getItem(position));
+                proxyContentProvider.deleteItem(mNote.getItem(position));
             }
+            ((ListNote)mNote).removeListElement(position);
+            notifyItemRemoved(position);
         }
 
         @Override
@@ -228,7 +231,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     iditem = proxyContentProvider.saveListItem(mNote);
                     emptyItem.setId(iditem);
                 }
-                int pos = mNote.addElement(new ListItem());
+                int pos = mNote.addElement(emptyItem);
                 Log.d(TAG, "Position inserted " + pos);
                 notifyItemInserted(pos);
 
@@ -257,12 +260,13 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         @Override
-        public void onItemMove(int fromPosition, int toPosition) {
+        public void onItemMove(int fromPosition, int toPremoveListElementosition) {
             Log.d(TAG, "Inside cards list is not interactive");
         }
 
         @Override
         public void onItemDismiss(int position) {
+            Log.d(TAG, "Dismiss Simple mode");
 
         }
 

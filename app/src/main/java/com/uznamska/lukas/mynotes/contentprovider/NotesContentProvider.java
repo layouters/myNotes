@@ -74,7 +74,6 @@ public class NotesContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, REMINDER_BASE_PATH, REMINDER_ITEMS);
     }
 
-
     @Override
     public boolean onCreate() {
         Log.d(TAG, "Content provider oncreate");
@@ -184,6 +183,7 @@ public class NotesContentProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Log.d(TAG, "Delete Uri: " + uri);
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase sqlDB = database.getWritableDatabase();
         int rowsDeleted = 0;
@@ -256,6 +256,8 @@ public class NotesContentProvider extends ContentProvider {
                             selectionArgs);
                 }
                 break;
+            //REMINDER_ITEMS
+            //ITEMS_ID
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }

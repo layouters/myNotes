@@ -16,7 +16,9 @@ import com.uznamska.lukas.mynotes.database.NotesTable;
 import com.uznamska.lukas.mynotes.database.ReminderItemTable;
 import com.uznamska.lukas.mynotes.items.AbstractNote;
 import com.uznamska.lukas.mynotes.items.INote;
+import com.uznamska.lukas.mynotes.items.INoteItem;
 import com.uznamska.lukas.mynotes.items.IReminder;
+import com.uznamska.lukas.mynotes.items.Iterator;
 import com.uznamska.lukas.mynotes.items.ListItem;
 import com.uznamska.lukas.mynotes.items.ListNote;
 import com.uznamska.lukas.mynotes.items.NoteFactory;
@@ -59,36 +61,9 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
 
             cursor.close();
             if (note instanceof ListNote) {
-                Cursor cursorlist;
-                //Uri noteListUri = NotesContentProvider.LIST_NOTES_CONTENT_URI;
-                String selection = NotesTable.TABLE_NOTES + "." + NotesTable.COLUMN_ID +" = ?";
-                String[] selectionArgs = {String.valueOf(note.getId())};
-                String[] projectionl = {
-                        ListItemTable.TABLE_LISTITEM + "." + ListItemTable.COLUMN_TEXT,
-                        ListItemTable.COLUMN_IS_CHECKED,
-                        NotesTable.COLUMN_TITLE
-                };
-                cursorlist = mContext.getContentResolver().query(NotesContentProvider.LIST_NOTES_CONTENT_URI,
-                                                                 projectionl, selection, selectionArgs, null);
-                    while (cursorlist.moveToNext()) {
-
-                        String textitem = cursorlist.getString(0);
-                        String noteTitle = cursorlist.getString(2);
-                        Log.d(TAG, "TextItem: " + textitem + " Note title " + noteTitle);
-                        ListItem item = new ListItem();
-                        item.setText(textitem);
-                        note.addElement(item);
-
-                    }
-
-                cursorlist.close();
-              //  loadItems((ListNote)note);
-
+                loadItems((ListNote)note);
             }
             loadReminders(note);
-
-
-
         }
         Log.d(TAG, "Return note " + note);
         return note;
@@ -154,6 +129,11 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
 
             @Override
             public void storeAsListNote() {
+                mContext.getContentResolver().update(mUri, values, null, null);
+                Iterator it = mNote.getItemsIterator();
+                while(it.hasNext()) {
+                    Log.d(TAG, "Updating database " + it.next());
+                }
 
             }
 
@@ -217,11 +197,17 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
     public void deleteNote(Uri uri) {
         mContext.getContentResolver().delete(uri, null, null);
         //TODO: Delete all notes and reminders associated with the note.
+
     }
 
     @Override
     public void deleteItem(Uri uri) {
-        mContext.getContentResolver().delete(uri,null,null);
+        mContext.getContentResolver().delete(uri, null, null);
+    }
+
+    public void deleteItem(INoteItem item) {
+        Uri toDeleteUri = Uri.parse(NotesContentProvider.LIST_CONTENT_URI + "/" + item.getId());
+        mContext.getContentResolver().delete(toDeleteUri, null, null);
     }
 
     //@Override
@@ -288,7 +274,8 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
         String[] projectionl = {
                 ListItemTable.TABLE_LISTITEM + "." + ListItemTable.COLUMN_TEXT,
                 ListItemTable.COLUMN_IS_CHECKED,
-                NotesTable.COLUMN_TITLE
+                NotesTable.COLUMN_TITLE,
+                ListItemTable.TABLE_LISTITEM +"."+ ListItemTable.COLUMN_ID
         };
         cursorlist = mContext.getContentResolver().query(NotesContentProvider.LIST_NOTES_CONTENT_URI,
                                                          projectionl, selection, selectionArgs, null);
@@ -296,9 +283,11 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
         while (cursorlist.moveToNext()) {
             String textitem = cursorlist.getString(0);
             String noteTitle = cursorlist.getString(2);
-            Log.d(TAG, "TextItem: " + textitem + " Note title " + noteTitle);
+            int id = cursorlist.getInt(3);
+            Log.d(TAG, "Loading item TextItem: " + textitem + "note id " + id + " Note title " + noteTitle);
             ListItem item = new ListItem();
             item.setText(textitem);
+            item.setId(id);
             note.addElement(item);
         }
         cursorlist.close();

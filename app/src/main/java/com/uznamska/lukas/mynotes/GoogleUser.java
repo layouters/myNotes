@@ -57,7 +57,6 @@ class GoogleUser {
         }
 
         UserBuilder email(String email) {
-            Log.d("GGG", "FFFF000");
             this.mEmail = email;
             return this;
         }

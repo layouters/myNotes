@@ -39,6 +39,7 @@ public class ListItem extends AbstractNoteItem {
     @Override
     public String toString() {
         return "ListItem{" +
+                "ID= " + getId()+
                 "text='" + text + '\'' +
                 ", ticked=" + ticked +
                 '}';

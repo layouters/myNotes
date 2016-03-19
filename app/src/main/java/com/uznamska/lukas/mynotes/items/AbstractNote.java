@@ -119,6 +119,9 @@ public abstract class AbstractNote  implements INote {
     private void countSimpleItems() {
         ++simpleItems;
     }
+    private void uncountSimple() {
+        --simpleItems;
+    }
 
     @Override
     public int getListOrder(){
@@ -136,6 +139,13 @@ public abstract class AbstractNote  implements INote {
             countSimpleItems();
         }
         items.add(item);
+    }
+
+    protected void removeItem(int pos) {
+        if(items.get(pos).isSimple()) {
+            uncountSimple();
+        }
+        items.remove(pos);
     }
 
     protected List<INoteItem> getItems() {

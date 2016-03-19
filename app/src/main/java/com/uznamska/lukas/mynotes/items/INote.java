@@ -22,7 +22,7 @@ public interface INote {
     void setListOrder(int order);
 
     void move(int fromPosition, int toPosition);
-    public int addElement(INoteItem item);
+    int addElement(INoteItem item);
 
     Iterator getSimpleItemsIterator();
     Iterator getItemsIterator();
