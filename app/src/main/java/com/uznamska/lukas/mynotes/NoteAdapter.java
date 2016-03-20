@@ -48,6 +48,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         View.OnClickListener,
                         PopupMenu.OnMenuItemClickListener {
     private static final String TAG = "Note:NoteAdapter";
+    static int counter = 0 ;
     private final Context mContext;
     private final int HEADER_ELEMENT_TYPE = 0;
     private final int LIST_ELEMENT_TYPE = 1;
@@ -600,12 +601,15 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     }
 
-    public class ListItemViewHolder extends RecyclerView.ViewHolder implements IMovementInformator,
+    public  class ListItemViewHolder extends RecyclerView.ViewHolder implements IMovementInformator,
                 IBindActionTaker {
+
             TextView textItem;
             CheckBox ticked;
         public ListItemViewHolder(View itemView) {
             super(itemView);
+          //  Log.e(TAG, "ListHolder number " + counter);
+            counter++;
             textItem = (TextView) itemView.findViewById(R.id.edit_msg_text);
             ticked = (CheckBox)itemView.findViewById(R.id.edit_check);
         }
@@ -622,25 +626,20 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public void onBindViewHolder(final int position) {
+            Log.e(TAG, "On bind view holder " + position);
             this.textItem.setText(((ListNote) mNote).getListText(position));
-            this.textItem.addTextChangedListener(new SimpleTextWatcher() {
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    ((ListNote) mNote).setListText(position, s.toString());
-                    Log.d(TAG, "Saving " + s.toString() + " on position " + position);
-                    if(mNote.getItem(position) instanceof ListItem )
-                        ((ListItem)mNote.getItem(position)).onUpdateText();
-                }
-            });
-            this.ticked.setChecked(((ListNote) mNote).getListTicked(position));
-            this.ticked.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    Log.d(TAG, "CHEWCK BOX " + isChecked );
-                    ((ListNote) mNote).setListTicked(position, isChecked);
-                }
-            });
+            ItemTextWatcher watcher = new ItemTextWatcher(
+                    (ListItem)mNote.getItem(position));
+            this.textItem.addTextChangedListener(watcher);
+            //this.ticked.setChecked(((ListNote) mNote).getListTicked(position));
+//            this.ticked.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                    Log.d(TAG, "CHEWCK BOX " + isChecked );
+//                    ((ListNote) mNote).setListTicked(position, isChecked);
+//                }
+//            });
 
         }
 
@@ -716,6 +715,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     public  class SimpleTextWatcher implements TextWatcher {
+
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         }
@@ -724,6 +724,36 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
         @Override
         public void afterTextChanged(Editable s) {
+        }
+
+    }
+    public class ItemTextWatcher implements TextWatcher {
+
+        ListItem mItem;
+
+        public ItemTextWatcher(ListItem mItem) {
+            this.mItem = mItem;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                ///ListItem item;
+            if(mItem != null) {
+                mItem.setText(s.toString());
+                Log.d(TAG, "Saving " + s.toString() );
+            }
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
         }
     }
 

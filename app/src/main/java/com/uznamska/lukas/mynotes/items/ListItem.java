@@ -56,9 +56,9 @@ public class ListItem extends AbstractNoteItem {
     }
 
     public void onUpdateText() {
-        if(listener != null) {
-            listener.onUpdate();
-            listener = null;
-        }
+//        if(listener != null) {
+//            listener.onUpdate();
+//            listener = null;
+//        }
     }
 }
