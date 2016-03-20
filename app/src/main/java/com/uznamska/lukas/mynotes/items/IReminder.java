@@ -4,9 +4,6 @@
 
 package com.uznamska.lukas.mynotes.items;
 
-/**
- * Created by Anna on 2016-03-17.
- */
 public interface IReminder {
     void setDate(String date);
     String getDate();
@@ -14,4 +11,6 @@ public interface IReminder {
     String getRepeat();
     boolean isSet();
     void set(boolean isSet);
+    int getId();
+    void setId(int id);
 }

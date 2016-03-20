@@ -39,4 +39,9 @@ public class TextNote extends AbstractNote implements INote {
         Log.d(TAG, "Nothing can be added");
         return 0;
     }
+
+    @Override
+    public Iterator getListItemIterator() {
+        return null;
+    }
 }

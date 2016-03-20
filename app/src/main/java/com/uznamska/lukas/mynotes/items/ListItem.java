@@ -10,6 +10,7 @@ package com.uznamska.lukas.mynotes.items;
 public class ListItem extends AbstractNoteItem {
     String  text;
     boolean ticked;
+    IUpdateTextListener listener;
 
     public String getText() {
         return text;
@@ -48,5 +49,16 @@ public class ListItem extends AbstractNoteItem {
     @Override
     public boolean isSimple() {
         return true;
+    }
+
+    public void setUpdateTextListener(IUpdateTextListener list) {
+        listener = list;
+    }
+
+    public void onUpdateText() {
+        if(listener != null) {
+            listener.onUpdate();
+            listener = null;
+        }
     }
 }

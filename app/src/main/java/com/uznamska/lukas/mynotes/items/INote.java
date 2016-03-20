@@ -26,6 +26,7 @@ public interface INote {
 
     Iterator getSimpleItemsIterator();
     Iterator getItemsIterator();
+    Iterator getListItemIterator();
 
 //    String getDateReminder();
 //    void setDateReminder(String reminder);

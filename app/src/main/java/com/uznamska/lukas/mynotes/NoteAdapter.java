@@ -29,6 +29,7 @@ import com.uznamska.lukas.mynotes.items.IBindActionTaker;
 import com.uznamska.lukas.mynotes.items.INote;
 import com.uznamska.lukas.mynotes.items.INoteItem;
 import com.uznamska.lukas.mynotes.items.IReminder;
+import com.uznamska.lukas.mynotes.items.IUpdateTextListener;
 import com.uznamska.lukas.mynotes.items.ItemAdder;
 import com.uznamska.lukas.mynotes.items.ItemReminder;
 import com.uznamska.lukas.mynotes.items.ItemSeparator;
@@ -148,26 +149,26 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         public int getItemViewType(int position) {
-            Log.d(TAG, "ItemViewType: " + position);
+            //Log.d(TAG, "ItemViewType: " + position);
             INote note = mNote;
             if(note.getItem(position) instanceof Header) {
-                Log.d(TAG, "ItemViewType instance of header");
+                //Log.d(TAG, "ItemViewType instance of header");
                 resourceLayoutMap.put(HEADER_ELEMENT_TYPE, note.getItem(position));
                 return HEADER_ELEMENT_TYPE;
             } else if(note.getItem(position) instanceof ItemAdder){
-                Log.d(TAG, "ItemViewType instance of adder");
+                //Log.d(TAG, "ItemViewType instance of adder");
                 resourceLayoutMap.put(ADDER_ELEMENT_TYPE, note.getItem(position));
                 return ADDER_ELEMENT_TYPE;
             } else if(note.getItem(position) instanceof ListItem) {
-                Log.d(TAG, "ItemViewType instance of listiten");/////////////////
+                //Log.d(TAG, "ItemViewType instance of listiten");/////////////////
                 resourceLayoutMap.put(LIST_ELEMENT_TYPE, note.getItem(position));
                 return LIST_ELEMENT_TYPE;
             } else if(note.getItem(position) instanceof ItemSeparator) {
-                Log.d(TAG, "ItemViewType instance of separator");
+                //Log.d(TAG, "ItemViewType instance of separator");
                 resourceLayoutMap.put(ITEM_SEPARATOR, note.getItem(position));
                 return ITEM_SEPARATOR;
             } else if(note.getItem(position) instanceof ItemReminder) {
-                Log.d(TAG, "ItemViewType instance of remninder");
+               // Log.d(TAG, "ItemViewType instance of remninder");
                 resourceLayoutMap.put(ITEM_REMINDER, note.getItem(position));
                 return ITEM_REMINDER;
             }
@@ -193,8 +194,8 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public int getItemCount() {
-            Log.d(TAG, "this is size in  rich mode" + mNote.getSize());
-            Log.d(TAG, "this is note in  rich mode" + mNote);
+           // Log.d(TAG, "this is size in  rich mode" + mNote.getSize());
+           // Log.d(TAG, "this is note in  rich mode" + mNote);
             return mNote.getItemsIterator().getItemsNumber();
         }
 
@@ -230,9 +231,13 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     Log.d(TAG, "Add empty list element to database");
                     iditem = proxyContentProvider.saveListItem(mNote);
                     emptyItem.setId(iditem);
+                } else {
+                    Log.d(TAG, "New editor");
                 }
+                //emptyItem.setUpdateTextListener(tmpHolder);
                 int pos = mNote.addElement(emptyItem);
                 Log.d(TAG, "Position inserted " + pos);
+                //tmpHolder.itemView.setVisibility(View.INVISIBLE);
                 notifyItemInserted(pos);
 
             } else if(holder instanceof ReminderViewHolder) {
@@ -243,8 +248,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.reminder_type_menu, popup.getMenu());
                 popup.show();
-               // mNote.setDateReminder("Dupa");
-                notifyDataSetChanged();
+                //notifyDataSetChanged();
             }
         }
     }
@@ -314,7 +318,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         RecyclerView.ViewHolder createHeaderHolder(ViewGroup parent, int type) {
             View v = null;
-            Log.d(TAG, "This is Header element type");
+           // Log.d(TAG, "This is Header element type");
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.simple_note_header, parent, false);
             return  new SimplifiedHeaderViewHolder(v);
         }
@@ -322,7 +326,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         RecyclerView.ViewHolder createListElementHolder(ViewGroup parent, int type) {
             View v = null;
-            Log.d(TAG, "This is List element type");
+            //Log.d(TAG, "This is List element type");
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.simplified_list_view_item, parent, false);
             return new SimplifiedListItemViewHolder(v);
         }
@@ -336,7 +340,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         RecyclerView.ViewHolder createSeparatorHolder(ViewGroup parent, int type) {
             View v = null;
-            Log.d(TAG, "This is separator type");
+           // Log.d(TAG, "This is separator type");
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.separator_view_item, parent, false);
             return new SeparatorViewHolder(v);
         }
@@ -353,7 +357,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         RecyclerView.ViewHolder createHeaderHolder(ViewGroup parent, int type) {
             View v = null;
-            Log.d(TAG,"This is Header element type");
+            //Log.d(TAG,"This is Header element type");
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_view_item, parent, false);
             return  new HeaderViewHolder(v);
         }
@@ -361,7 +365,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         RecyclerView.ViewHolder createListElementHolder(ViewGroup parent, int type) {
             View v = null;
-            Log.d(TAG, "This is List element type");
+           // Log.d(TAG, "This is List element type");
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_list_view_item, parent, false);
             return new ListItemViewHolder(v);
         }
@@ -370,7 +374,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         RecyclerView.ViewHolder createAdderHolder(ViewGroup parent, int type) {
             View v = null;
             //RecyclerView.ViewHolder viewHolder = null;
-            Log.d(TAG,"This is Adder element type");
+           // Log.d(TAG,"This is Adder element type");
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.adder_view_item, parent, false);
             return new AdderItemViewHolder(v);
         }
@@ -378,7 +382,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         RecyclerView.ViewHolder createSeparatorHolder(ViewGroup parent, int type) {
             View v = null;
-            Log.d(TAG, "This is Separator element type");
+           // Log.d(TAG, "This is Separator element type");
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.separator_view_item, parent, false);
             return new SeparatorViewHolder(v);
         }
@@ -386,7 +390,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         RecyclerView.ViewHolder createReminderHolder(ViewGroup parent, int type) {
             View v = null;
-            Log.d(TAG, "This is Reminder element type");
+            //Log.d(TAG, "This is Reminder element type");
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.reminder_view_item, parent, false);
             return new ReminderViewHolder(v);
         }
@@ -624,6 +628,8 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     ((ListNote) mNote).setListText(position, s.toString());
                     Log.d(TAG, "Saving " + s.toString() + " on position " + position);
+                    if(mNote.getItem(position) instanceof ListItem )
+                        ((ListItem)mNote.getItem(position)).onUpdateText();
                 }
             });
             this.ticked.setChecked(((ListNote) mNote).getListTicked(position));
@@ -631,7 +637,8 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    ((ListNote) mNote).setListTicked(position,isChecked);
+                    Log.d(TAG, "CHEWCK BOX " + isChecked );
+                    ((ListNote) mNote).setListTicked(position, isChecked);
                 }
             });
 
@@ -676,7 +683,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     public class AdderItemViewHolder extends RecyclerView.ViewHolder implements IMovementInformator,
-                                    IBindActionTaker {
+                                    IBindActionTaker, IUpdateTextListener {
 
         public AdderItemViewHolder(View itemView) {
             super(itemView);
@@ -700,6 +707,11 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public void setViewClickListener(View.OnClickListener listener) {
             itemView.setOnClickListener(listener);
             itemView.setTag(this);
+        }
+
+        @Override
+        public void onUpdate() {
+            itemView.setVisibility(View.VISIBLE);
         }
     }
 

@@ -42,7 +42,7 @@ import java.io.InputStream;
  */
 public class NoteFragment extends Fragment implements MainActivity.BackPressedListener {
 
-    private static final String TAG = "NoteTag";
+    private static final String TAG = "Notes:NoteFragment";
     public static final String NEXT_POSITION = "com.uznamska.lukas.position";
     public static final String FRAGMENT_NAME = "Note Fragment";
     private final int SELECT_PHOTO = 1;
@@ -58,6 +58,7 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
     ImageView mImageView;
     NoteFactory factory = new NoteFactory();
     NotesContentProviderProxy proxyContentProvider;
+    NoteAdapter.EditorType mEditType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,35 +92,26 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d(TAG, "On create view");
-        ActionBar mActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-                Bundle b = getActivity().getIntent().getExtras();
+      //  ActionBar mActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        Bundle b = getActivity().getIntent().getExtras();
 
-        NoteAdapter.EditorType editType = NoteAdapter.EditorType.NEW;
+        mEditType = NoteAdapter.EditorType.NEW;
         if(noteUri == null) {
             mNote = factory.getNote(mNoteType);
-            editType = NoteAdapter.EditorType.NEW;
+            mEditType = NoteAdapter.EditorType.NEW;
+            Log.d(TAG, "Uri is null");
         } else {
             mNote = proxyContentProvider.getNoteFromUri(noteUri);
-            editType = NoteAdapter.EditorType.EDIT;
+            mEditType = NoteAdapter.EditorType.EDIT;
             Log.d(TAG, "Note from uri " + mNote);
         }
         Log.d(TAG, "Note from uri " + mNote);
         syncToolbar(b);
         View rootView = inflater.inflate(R.layout.recycle_view_frag, container, false);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
-//        mRecyclerView.addOnItemTouchListener(
-//                new RecyclerItemClickListener(this.getContext(), new RecyclerItemClickListener.OnItemClickListener() {
-//                    @Override public void onItemClick(View view, int position) {
-//                        //int id = mNotesList.get(position).getId();
-//                        //onCardClicked(id);
-//                        INoteItem item = mNote.getItem(position);
-//                        Log.d(TAG, item + " has been clicked");
-//                    }
-//                })
-//        );
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new NoteAdapter(mNote, this.getContext(),editType);
+        mAdapter = new NoteAdapter(mNote, this.getContext(),mEditType);
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
         ItemTouchHelper.Callback callback =
@@ -166,10 +158,10 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
         Log.d(TAG, "On resume");
         super.onResume();
         ActionBar ab =((AppCompatActivity) getActivity()).getSupportActionBar();
-        if(ab != null) {
-            ab.setDisplayHomeAsUpEnabled(true);
-            ab.setDisplayShowHomeEnabled(true);
-        }
+//        if(ab != null) {
+//            ab.setDisplayHomeAsUpEnabled(true);
+//            ab.setDisplayShowHomeEnabled(true);
+//        }
         Log.e(TAG, "Action bar can not be obtained - home can not be set !!!");
     }
 
@@ -205,7 +197,6 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-
                 // }
         }
     }

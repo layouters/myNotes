@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes;
 
 import android.annotation.TargetApi;
@@ -12,6 +16,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -41,6 +46,7 @@ public class MainActivity extends AppCompatActivity
     GoogleUser mUser;
 
     class FragmentTransactionLoader {
+
         public void loadNoteFragment(int index, String type) {
             Log.d(TAG,"Loading type: " + type);
             NoteFragment noteFragment = new NoteFragment();
@@ -66,6 +72,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         private void performTransaction(Fragment fragment,String fragmentName, boolean isBackStack) {
+
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_view, fragment);
             if(isBackStack) {
@@ -117,7 +124,7 @@ public class MainActivity extends AppCompatActivity
         void OnBackPressured();
     }
 
-    private static final String TAG = "Activity";
+    private static final String TAG = "Notes:Activity";
     RecyclerViewFragment mRecycleFragment = null;
     ActionBarDrawerToggle mDrawerToggle = null;
     BackPressedListener mBackListener = null;
@@ -127,25 +134,64 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "ONCREATE");
+
+
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState == null) {
             fragmentLoader.loadListFragment();
+            // if(getSupportFragmentManager().getBackStackEntryCount() == 0) {
         }
+            Intent intent = getIntent();
+            String nameSurname = intent.getStringExtra("displayname");
+            String imageUrl = intent.getStringExtra("imageurl");
+            String useId = intent.getStringExtra("userid");
+            String email = intent.getStringExtra("email");
+            mUser = new GoogleUser.UserBuilder(nameSurname).
+                    userId(useId).
+                    imageUrl(imageUrl).
+                    email(email).
+                    build();
+            Log.d(TAG, "name " + mUser.getNameSurname());
+            getSupportFragmentManager().addOnBackStackChangedListener(this);
 
-        Intent intent = getIntent();
-        String nameSurname = intent.getStringExtra("displayname");
-        String imageUrl = intent.getStringExtra("imageurl");
-        String useId  = intent.getStringExtra("userid");
-        String email = intent.getStringExtra("email");
-        mUser = new GoogleUser.UserBuilder(nameSurname).
-                                        userId(useId).
-                                        imageUrl(imageUrl).
-                                        email(email).
-                                        build();
-        Log.d(TAG, "name " + mUser.getNameSurname());
-        new MenuBuilder().buildMenuStuff();
-        getSupportFragmentManager().addOnBackStackChangedListener(this);
+            new MenuBuilder().buildMenuStuff();
+        onBackStackChanged();
+        FragmentManager manager = getSupportFragmentManager();
+        if(manager != null && savedInstanceState != null) {
+            //updateAccordingToStackLevel(manager.getBackStackEntryCount());
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "On stop");
+    }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "On restart");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "On start");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "On resume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "On pause");
     }
 
     @Override
@@ -153,7 +199,8 @@ public class MainActivity extends AppCompatActivity
         if(mBackListener != null)
             mBackListener.OnBackPressured();
         super.onBackPressed();
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        if(mDrawerToggle != null)
+            mDrawerToggle.setDrawerIndicatorEnabled(true);
         Log.d(TAG, "Back has been pressed");
     }
 
@@ -167,8 +214,9 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         Log.d(TAG, "load menu");
-        // if(getSupportFragmentManager().getBackStackEntryCount() == 0) {
-        getMenuInflater().inflate(R.menu.main, menu);
+         if(getSupportFragmentManager().getBackStackEntryCount() == 0) {
+             getMenuInflater().inflate(R.menu.main, menu);
+         }
         return true;
     }
 
@@ -230,16 +278,18 @@ public class MainActivity extends AppCompatActivity
 
     public void updateAccordingToStackLevel(int stackLevel){
         if(stackLevel == 0) {
-            getSupportActionBar().setTitle(R.string.app_name);
-            mBackListener = null;
             Log.d(TAG, "Back stack changed to level main");
-            //getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            //getSupportActionBar().setDisplayShowHomeEnabled(false);
-           // getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            //getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(
-                    ContextCompat.getColor(getBaseContext(), R.color.colorPrimary)));
-
+            ActionBar ab = getSupportActionBar();
+            if (ab != null) {
+                getSupportActionBar().setTitle(R.string.app_name);
+                mBackListener = null;
+                //getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                //getSupportActionBar().setDisplayShowHomeEnabled(false);
+                // getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                //getSupportActionBar().setHomeButtonEnabled(true);
+                getSupportActionBar().setBackgroundDrawable(new ColorDrawable(
+                        ContextCompat.getColor(getBaseContext(), R.color.colorPrimary)));
+            }
             if(mToolbarBottom != null)
                 mToolbarBottom.setVisibility(View.VISIBLE);
         } else {
@@ -260,73 +310,72 @@ public class MainActivity extends AppCompatActivity
         getSupportFragmentManager().popBackStack();
         return true;
     }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
+//
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+//        mDrawerToggle.onConfigurationChanged(newConfig);
+//    }
 
     class MenuBuilder {
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         public void buildMenuStuff() {
+            Log.d(TAG, "BUILDMENUSTUFF");
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            toolbar.inflateMenu(R.menu.main);
-           // inflater.inflate(R.menu.frag_menu, menu);
-            toolbar.hideOverflowMenu();
-            setSupportActionBar(toolbar);
+            if(toolbar != null) {
+                toolbar.inflateMenu(R.menu.main);
+                // inflater.inflate(R.menu.frag_menu, menu);
+                toolbar.hideOverflowMenu();
+                setSupportActionBar(toolbar);
+            }
 
             mToolbarBottom = (Toolbar) findViewById(R.id.toolbar_bottom);
-//            LayoutInflater inflator = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//            View v = inflator.inflate(R.layout.bottom_toolbar, null);
-            mToolbarBottom.setBackground(new ColorDrawable(
-                    Color.rgb(255, 255, 255)));
-            TextView takeNote = (TextView)findViewById(R.id.btn_take_note);
-            takeNote.setOnClickListener(MainActivity.this);
-            mToolbarBottom.setOnMenuItemClickListener(MainActivity.this);
-                    // Inflate a menu to be displayed in the toolbar
-            mToolbarBottom.inflateMenu(R.menu.main_bottom);
-
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
+            if(mToolbarBottom != null) {
+                mToolbarBottom.setBackground(new ColorDrawable(
+                        Color.rgb(255, 255, 255)));
+                TextView takeNote = (TextView) findViewById(R.id.btn_take_note);
+                takeNote.setOnClickListener(MainActivity.this);
+                mToolbarBottom.setOnMenuItemClickListener(MainActivity.this);
+                // Inflate a menu to be displayed in the toolbar
+                mToolbarBottom.inflateMenu(R.menu.main_bottom);
+            }
 
             DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            mDrawerToggle = new ActionBarDrawerToggle(
-                    MainActivity.this, drawer,R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+            if(drawer != null) {
+                mDrawerToggle = new ActionBarDrawerToggle(
+                        MainActivity.this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
-                /** Called when a drawer has settled in a completely closed state. */
-                public void onDrawerClosed(View view) {
-                    super.onDrawerClosed(view);
-                    invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-                }
+                    /**
+                     * Called when a drawer has settled in a completely closed state.
+                     */
+                    public void onDrawerClosed(View view) {
+                        super.onDrawerClosed(view);
+                        invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                    }
 
-                /** Called when a drawer has settled in a completely open state. */
-                public void onDrawerOpened(View drawerView) {
-                    super.onDrawerOpened(drawerView);
-                    invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-                }
-            };
-            drawer.setDrawerListener(mDrawerToggle);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-           // getSupportActionBar().setHomeButtonEnabled(true);
+                    /**
+                     * Called when a drawer has settled in a completely open state.
+                     */
+                    public void onDrawerOpened(View drawerView) {
+                        super.onDrawerOpened(drawerView);
+                        invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                    }
+                };
+                drawer.setDrawerListener(mDrawerToggle);
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-            mDrawerToggle.syncState();
+                mDrawerToggle.syncState();
 
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            navigationView.getHeaderView(0).setVisibility(View.GONE);
-            View  headerView  = navigationView.inflateHeaderView(R.layout.nav_header_main);
-            TextView tview = (TextView) headerView.findViewById(R.id.userName);
-            TextView emailView = (TextView)headerView.findViewById(R.id.textView);
-            tview.setText(mUser.getNameSurname());
-            emailView.setText(mUser.getEmail());
-            //new DownloadImageTask((ImageView)  headerView.findViewById(R.id.imageView)).execute(mUser.getImageUrl());
-            navigationView.setNavigationItemSelectedListener(MainActivity.this);
+                NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+                navigationView.getHeaderView(0).setVisibility(View.GONE);
+                View  headerView  = navigationView.inflateHeaderView(R.layout.nav_header_main);
+                TextView tview = (TextView) headerView.findViewById(R.id.userName);
+                TextView emailView = (TextView)headerView.findViewById(R.id.textView);
+                tview.setText(mUser.getNameSurname());
+                emailView.setText(mUser.getEmail());
+
+                navigationView.setNavigationItemSelectedListener(MainActivity.this);
+            }
         }
     }
 }

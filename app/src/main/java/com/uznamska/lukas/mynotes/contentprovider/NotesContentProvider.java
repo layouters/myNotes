@@ -40,6 +40,7 @@ public class NotesContentProvider extends ContentProvider {
     private static final int NOTE_ITEMS = 50;
     private static final int NOTE_ITEMS_ID = 60;
     private static final int REMINDER_ITEMS = 70;
+    private static final int REMINDER_ITEMS_ID = 80;
 
     private static final String AUTHORITY = "com.uznamska.lukas.mynotes.contentprovider";
     private static final String NOTES_BASE_PATH = NotesTable.TABLE_NOTES;
@@ -72,6 +73,7 @@ public class NotesContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, "listnote", NOTE_ITEMS);
         sURIMatcher.addURI(AUTHORITY, "listnote" + "/#", NOTE_ITEMS_ID);
         sURIMatcher.addURI(AUTHORITY, REMINDER_BASE_PATH, REMINDER_ITEMS);
+        sURIMatcher.addURI(AUTHORITY, REMINDER_BASE_PATH + "/#", REMINDER_ITEMS_ID);
     }
 
     @Override
@@ -230,6 +232,7 @@ public class NotesContentProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        Log.d(TAG, "Update Uri: " + uri);
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase sqlDB = database.getWritableDatabase();
         int rowsUpdated = 0;
@@ -256,8 +259,39 @@ public class NotesContentProvider extends ContentProvider {
                             selectionArgs);
                 }
                 break;
-            //REMINDER_ITEMS
-            //ITEMS_ID
+            case REMINDER_ITEMS_ID:
+                String remid = uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    rowsUpdated = sqlDB.update(ReminderItemTable.TABLE_REMINDERITEMS,
+                            values,
+                            ReminderItemTable.COLUMN_ID + "=" + remid,
+                            null);
+                } else {
+                    rowsUpdated = sqlDB.update(ReminderItemTable.TABLE_REMINDERITEMS,
+                            values,
+                            ReminderItemTable.COLUMN_ID + "=" + remid
+                                    + " and "
+                                    + selection,
+                            selectionArgs);
+                }
+            break;
+            case ITEMS_ID:
+                Log.d(TAG, "ITEMS_ID update");
+                String idit = uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    rowsUpdated = sqlDB.update(ListItemTable.TABLE_LISTITEM,
+                            values,
+                            ListItemTable.COLUMN_ID + "=" + idit,
+                            null);
+                } else {
+                    rowsUpdated = sqlDB.update(ListItemTable.TABLE_LISTITEM,
+                            values,
+                            ListItemTable.COLUMN_ID + "=" + idit
+                                    + " and "
+                                    + selection,
+                            selectionArgs);
+                }
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }

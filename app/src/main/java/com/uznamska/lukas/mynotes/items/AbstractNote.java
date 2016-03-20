@@ -50,6 +50,7 @@ public abstract class AbstractNote  implements INote {
     class NoteReminder implements  IReminder {
         String date;
         String repeat;
+        int mId;
         boolean mIsSet = false;
 
         @Override
@@ -75,6 +76,16 @@ public abstract class AbstractNote  implements INote {
         @Override
         public void set(boolean isSet) {
             mIsSet = isSet;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+
+        @Override
+        public void setId(int id) {
+            mId = id;
         }
 
         @Override

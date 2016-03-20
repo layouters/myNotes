@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2016.  Lukasz Fiszer
+  -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.uznamska.lukas.mynotes">
 
@@ -22,7 +26,8 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="keyboard|keyboardHidden|orientation">
 
         </activity>
 

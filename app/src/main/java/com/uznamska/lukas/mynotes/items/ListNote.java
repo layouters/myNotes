@@ -9,16 +9,22 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 
+
 public class ListNote extends AbstractNote implements INoteForList {
 
     private class ListItemIterator implements Iterator {
 
-        int index = 1;
-        int lastIndex = getLastListItemPosition();
+        int index;
+        int lastIndex;
+
+        public ListItemIterator() {
+            index = 1;
+            lastIndex = getLastListItemPosition();
+        }
 
         @Override
         public boolean hasNext() {
-            return index < lastIndex;
+            return index <= lastIndex;
         }
 
         @Override
@@ -46,7 +52,8 @@ public class ListNote extends AbstractNote implements INoteForList {
         addItem(new ItemReminder());
     }
 
-    public Iterator getListIterator() {
+    @Override
+    public Iterator getListItemIterator() {
         return new ListItemIterator();
     }
 

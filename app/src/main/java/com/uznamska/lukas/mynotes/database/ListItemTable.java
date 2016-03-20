@@ -7,9 +7,6 @@ package com.uznamska.lukas.mynotes.database;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-/**
- * Created by Anna on 2016-03-12.
- */
 public class ListItemTable {
     public static final String TABLE_LISTITEM = "listitems";
     public static final String COLUMN_ID = "_id";

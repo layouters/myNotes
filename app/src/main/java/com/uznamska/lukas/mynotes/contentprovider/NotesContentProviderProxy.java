@@ -90,17 +90,19 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
 
             @Override
             public void storeAsListNote() {
+                Log.d(TAG, "Store as list saver");
                 values.put(NotesTable.COLUMN_TYPE, "ListNote");
                 ContentValues val;
                 mUri = mContext.getContentResolver().insert(NotesContentProvider.NOTES_CONTENT_URI,
                         values);
                 String idx = mUri.getLastPathSegment();
-                //TODO: use list iterator here!!!!
-                for(int i = 1; i < mNote.getSize() - 3; i++) {
+                Iterator li = mNote.getListItemIterator();
+                while(li.hasNext()) {
+                    ListItem  item = (ListItem) li.next();
                     val = new ContentValues();
-                    val.put(ListItemTable.COLUMN_TEXT, ((ListNote) mNote).getListText(i));
+                    val.put(ListItemTable.COLUMN_TEXT, item .getText());
                     val.put(ListItemTable.NOTE_ID, idx);
-                    val.put(ListItemTable.COLUMN_IS_CHECKED, 0);
+                    val.put(ListItemTable.COLUMN_IS_CHECKED, item.isTicked());
                     val.put(ListItemTable.COLUMN_LIST_ORDER, 0);
                     mContext.getContentResolver().insert(NotesContentProvider.LIST_CONTENT_URI, val);
                 }
@@ -113,7 +115,7 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
                     ContentValues valuez = new ContentValues();
                     valuez.put(ReminderItemTable.COLUMN_DATE, mNote.getReminder().getDate());
                     valuez.put(ReminderItemTable.COLUMN_RPEAT, "NO REPEAT");
-                    valuez.put(ListItemTable.NOTE_ID, idnote);
+                    valuez.put(ReminderItemTable.NOTE_ID, idnote);
                     mContext.getContentResolver().insert(NotesContentProvider.REMINDER_CONTENT_URI, valuez);
                 }
 
@@ -129,16 +131,48 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
 
             @Override
             public void storeAsListNote() {
+                Log.d(TAG, "Store as list updater");
                 mContext.getContentResolver().update(mUri, values, null, null);
-                Iterator it = mNote.getItemsIterator();
+                Iterator it = mNote.getListItemIterator();
+                Log.d(TAG, "Getting item iterator" + it.getItemsNumber());
                 while(it.hasNext()) {
-                    Log.d(TAG, "Updating database " + it.next());
+                    ListItem item = (ListItem)it.next();
+                    if(item.getId() > 0) {
+                        Log.d(TAG, "Updating database " + item);
+                        ContentValues vals = buildValuesFromItem(item, mNote.getId());
+                        Uri toUpdateUri = Uri.parse(NotesContentProvider.LIST_CONTENT_URI + "/" + item.getId());
+                        mContext.getContentResolver().update(toUpdateUri, vals, null, null);
+                    }
                 }
+            }
 
+            private ContentValues buildValuesFromItem(ListItem item, int noteid) {
+                ContentValues val = new ContentValues();
+                val.put(ListItemTable.COLUMN_TEXT, item.getText());
+                val.put(ListItemTable.NOTE_ID, noteid);
+                val.put(ListItemTable.COLUMN_IS_CHECKED, item.isTicked());
+                val.put(ListItemTable.COLUMN_LIST_ORDER, 0);
+                return val;
             }
 
             @Override
             public void saveReminder() {
+                Log.d(TAG, "save Reminder updater");
+                if(mUri != null && mNote.getReminder().isSet()) {
+                    int reminderid = mNote.getReminder().getId();
+                    Log.d(TAG, "GETTING REMINDER ID " + reminderid);
+                    ContentValues valuez = new ContentValues();
+                    valuez.put(ReminderItemTable.COLUMN_DATE, mNote.getReminder().getDate());
+                    valuez.put(ReminderItemTable.COLUMN_RPEAT, "NO REPEAT");
+                  //
+                    if(reminderid > 0) {
+                        Uri toupdate = Uri.parse(NotesContentProvider.REMINDER_CONTENT_URI + "/" + reminderid);
+                        mContext.getContentResolver().update(toupdate, valuez, null, null);
+                    } else {
+                        valuez.put(ReminderItemTable.NOTE_ID, mNote.getId());
+                        mContext.getContentResolver().insert(NotesContentProvider.REMINDER_CONTENT_URI, valuez);
+                    }
+                }
 
             }
         }
@@ -184,6 +218,7 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
 
     @Override
     public Uri saveNote(INote note, int listOrder, Uri uri) {
+        Log.d(TAG, "Store note!!! " + note);
         if(note.getTitle() == null) {
             return null;
         }
@@ -206,6 +241,7 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
     }
 
     public void deleteItem(INoteItem item) {
+        Log.d(TAG, "delete item " + item);
         Uri toDeleteUri = Uri.parse(NotesContentProvider.LIST_CONTENT_URI + "/" + item.getId());
         mContext.getContentResolver().delete(toDeleteUri, null, null);
     }
@@ -282,12 +318,18 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
         Log.d(TAG, "cursorlist " + cursorlist);
         while (cursorlist.moveToNext()) {
             String textitem = cursorlist.getString(0);
+            short ischecked = cursorlist.getShort(1);
             String noteTitle = cursorlist.getString(2);
             int id = cursorlist.getInt(3);
             Log.d(TAG, "Loading item TextItem: " + textitem + "note id " + id + " Note title " + noteTitle);
             ListItem item = new ListItem();
             item.setText(textitem);
             item.setId(id);
+            if(ischecked == 1) {
+                item.setTicked(true);
+            } else {
+                item.setTicked(false);
+            }
             note.addElement(item);
         }
         cursorlist.close();
@@ -299,6 +341,7 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
         String[] selectionArgs = {String.valueOf(note.getId())};
         String[] projection = {
                 ReminderItemTable.TABLE_REMINDERITEMS + "." + ReminderItemTable.COLUMN_DATE,
+                ReminderItemTable.TABLE_REMINDERITEMS + "." + ReminderItemTable.COLUMN_ID,
                 NotesTable.COLUMN_TITLE
         };
         cursorlist = mContext.getContentResolver().query(NotesContentProvider.REMINDER_CONTENT_URI,
@@ -306,10 +349,12 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
 
         while (cursorlist.moveToNext()) {
             String reminderDate = cursorlist.getString(0);
+            int remId = cursorlist.getInt(1);
             String noteTitle = cursorlist.getString(1);
             Log.d(TAG, "DateItem: " + reminderDate + " Note title " + noteTitle);
             IReminder r = note.getReminder();
             r.setDate(reminderDate);
+            r.setId(remId);
         }
         cursorlist.close();
     }

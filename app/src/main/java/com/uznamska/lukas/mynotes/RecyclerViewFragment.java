@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016.  Lukasz Fiszer
+ */
+
 package com.uznamska.lukas.mynotes;
 
 import android.app.Activity;
@@ -149,8 +153,8 @@ public class RecyclerViewFragment extends Fragment implements RVAdapter.OnCardCl
 
         if (savedInstanceState != null) {
             // Restore saved layout manager type.
-            mCurrentLayoutManagerType = (LayoutManagerType) savedInstanceState
-                    .getSerializable(KEY_LAYOUT_MANAGER);
+           // mCurrentLayoutManagerType = (LayoutManagerType) savedInstanceState
+            //        .getSerializable(KEY_LAYOUT_MANAGER);
         }
         setRecyclerViewLayoutManager(mCurrentLayoutManagerType);
         //create adapter
