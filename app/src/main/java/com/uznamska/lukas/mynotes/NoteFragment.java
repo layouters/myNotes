@@ -109,10 +109,10 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
         syncToolbar(b);
         View rootView = inflater.inflate(R.layout.recycle_view_frag, container, false);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new NoteAdapter(mNote, this.getContext(),mEditType);
         mRecyclerView.setAdapter(mAdapter);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter.notifyDataSetChanged();
         ItemTouchHelper.Callback callback =
                 new CardItemTouchHelper(mAdapter);

@@ -7,6 +7,7 @@ package com.uznamska.lukas.mynotes;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Paint;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -21,6 +22,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.uznamska.lukas.mynotes.contentprovider.NotesContentProviderProxy;
@@ -134,6 +136,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         public  RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            //Log.d(TAG, "Procedure: On create viewholder");
             IBindActionTaker viewHolder = (IBindActionTaker)factoryHolder.getHolderOfType(parent, viewType);
             if(viewHolder != null) {
                 viewHolder.setViewClickListener(NoteAdapter.this);
@@ -144,13 +147,17 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         public  void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+            Log.d(TAG, "Procedure: On bind view holder " + position);
+
             if(holder != null) {
                 ((IBindActionTaker) holder).onBindViewHolder(position);
+                //NoteAdapter.this.bindViewHolder(holder,position);
             }
         }
 
         public int getItemViewType(int position) {
-            //Log.d(TAG, "ItemViewType: " + position);
+
+           // Log.d(TAG, "Procedure:ItemViewType: " + position);
             INote note = mNote;
             if(note.getItem(position) instanceof Header) {
                 //Log.d(TAG, "ItemViewType instance of header");
@@ -197,6 +204,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public int getItemCount() {
            // Log.d(TAG, "this is size in  rich mode" + mNote.getSize());
            // Log.d(TAG, "this is note in  rich mode" + mNote);
+           // Log.d(TAG, "Procedure: getitemcoun");
             return mNote.getItemsIterator().getItemsNumber();
         }
 
@@ -239,7 +247,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 int pos = mNote.addElement(emptyItem);
                 Log.d(TAG, "Position inserted " + pos);
                 //tmpHolder.itemView.setVisibility(View.INVISIBLE);
-                notifyItemInserted(pos);
+             notifyItemInserted(pos);
 
             } else if(holder instanceof ReminderViewHolder) {
                 ReminderViewHolder tmpHolder = (ReminderViewHolder)holder;
@@ -272,7 +280,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         public void onItemDismiss(int position) {
             Log.d(TAG, "Dismiss Simple mode");
-
         }
 
         @Override
@@ -368,7 +375,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             View v = null;
            // Log.d(TAG, "This is List element type");
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.edit_list_view_item, parent, false);
-            return new ListItemViewHolder(v);
+            return new ListItemViewHolder(v, new ItemTextWatcher(), new ItemCheckedListener());
         }
 
         @Override
@@ -417,6 +424,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             Log.e(TAG, "Unsupported Display mode");
         }
         proxyContentProvider = new NotesContentProviderProxy(mContext);
+
     }
 
     public PresentationMode getDisplayMode() {
@@ -604,14 +612,20 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public  class ListItemViewHolder extends RecyclerView.ViewHolder implements IMovementInformator,
                 IBindActionTaker {
 
-            TextView textItem;
-            CheckBox ticked;
-        public ListItemViewHolder(View itemView) {
+        TextView textItem;
+        CheckBox ticked;
+        ItemTextWatcher mTextWatcher;
+        ItemCheckedListener mCheckListener;
+
+        public ListItemViewHolder(View itemView, ItemTextWatcher itemTextListener,
+                                  ItemCheckedListener checkListener) {
             super(itemView);
-          //  Log.e(TAG, "ListHolder number " + counter);
-            counter++;
             textItem = (TextView) itemView.findViewById(R.id.edit_msg_text);
             ticked = (CheckBox)itemView.findViewById(R.id.edit_check);
+            mTextWatcher = itemTextListener;
+            this.textItem.addTextChangedListener(mTextWatcher);
+            mCheckListener = checkListener;
+            this.ticked.setOnCheckedChangeListener(mCheckListener);
         }
 
         @Override
@@ -626,20 +640,18 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public void onBindViewHolder(final int position) {
-            Log.e(TAG, "On bind view holder " + position);
+            Log.e(TAG, "On bind view holder " + position + " TEXT " + ((ListNote) mNote).getListText(position));
+            mTextWatcher.updatePosition(position);
+            mCheckListener.updatePosition(position);
             this.textItem.setText(((ListNote) mNote).getListText(position));
-            ItemTextWatcher watcher = new ItemTextWatcher(
-                    (ListItem)mNote.getItem(position));
-            this.textItem.addTextChangedListener(watcher);
-            //this.ticked.setChecked(((ListNote) mNote).getListTicked(position));
-//            this.ticked.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    Log.d(TAG, "CHEWCK BOX " + isChecked );
-//                    ((ListNote) mNote).setListTicked(position, isChecked);
-//                }
-//            });
+            boolean isChecked = ((ListNote) mNote).getListTicked(position);
+            this.ticked.setChecked(isChecked);
+            int flag = 0;
+            if(isChecked) {
+                flag = Paint.STRIKE_THRU_TEXT_FLAG;
+            }
+            textItem.setPaintFlags(textItem.getPaintFlags() | flag);
+
 
         }
 
@@ -725,14 +737,13 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         public void afterTextChanged(Editable s) {
         }
-
     }
+
     public class ItemTextWatcher implements TextWatcher {
+        int pos;
 
-        ListItem mItem;
-
-        public ItemTextWatcher(ListItem mItem) {
-            this.mItem = mItem;
+        public void updatePosition(int pos) {
+            this.pos = pos;
         }
 
         @Override
@@ -742,18 +753,32 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                ///ListItem item;
-            if(mItem != null) {
-                mItem.setText(s.toString());
-                Log.d(TAG, "Saving " + s.toString() );
-            }
-
+            ((ListItem)mNote.getItem(pos)).setText(s.toString());
+            Log.d(TAG, "Saving " + s.toString() + " " + pos);
         }
 
         @Override
         public void afterTextChanged(Editable s) {
 
+
+        }
+    }
+    public class ItemCheckedListener implements CompoundButton.OnCheckedChangeListener {
+        int pos;
+
+        public void updatePosition(int pos) {
+            this.pos = pos;
+        }
+
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            ((ListItem) mNote.getItem(pos)).setTicked(isChecked);
+            int flag = 0;
+            if (isChecked) {
+                flag = Paint.STRIKE_THRU_TEXT_FLAG;
+            }
+            // textItem.setPaintFlags(textItem.getPaintFlags() | flag);
+           // notifyDataSetChanged();
         }
     }
 

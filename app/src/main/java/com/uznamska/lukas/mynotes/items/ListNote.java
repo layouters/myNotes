@@ -46,7 +46,6 @@ public class ListNote extends AbstractNote implements INoteForList {
     public ListNote() {
         setItems(new ArrayList<INoteItem>());
         addItem(new Header());
-        addItem(new ListItem());
         addItem(new ItemAdder());
         addItem(new ItemSeparator());
         addItem(new ItemReminder());
@@ -65,6 +64,8 @@ public class ListNote extends AbstractNote implements INoteForList {
         int start  = getItems().size() - 1;
         while(!(getItems().get(start) instanceof ListItem)) {
             --start;
+            if(start < 0)
+                break;
         }
         return start;
     }
