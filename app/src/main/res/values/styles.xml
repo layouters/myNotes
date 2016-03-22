@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2016.  Lukasz Fiszer
+  -->
+
 <resources>
 
     <!-- Base application theme. -->
@@ -6,7 +10,7 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/white</item>
+        <item name="colorAccent">@color/black</item>
     </style>
 
     <!--<style name="AppTheme.ActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar">-->

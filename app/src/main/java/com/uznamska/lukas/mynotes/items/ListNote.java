@@ -103,7 +103,6 @@ public class ListNote extends AbstractNote implements INoteForList {
             Log.d(TAG, "Element is ticked:" + isticked);
             ((ListItem) item).ticked = isticked;
         }
-
     }
 
     @Override

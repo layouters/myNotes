@@ -4,10 +4,14 @@
 
 package com.uznamska.lukas.mynotes;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Paint;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -24,6 +28,7 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.uznamska.lukas.mynotes.contentprovider.NotesContentProviderProxy;
 import com.uznamska.lukas.mynotes.items.Header;
@@ -38,7 +43,10 @@ import com.uznamska.lukas.mynotes.items.ItemSeparator;
 import com.uznamska.lukas.mynotes.items.ListItem;
 import com.uznamska.lukas.mynotes.items.ListNote;
 
+import java.security.Timestamp;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,11 +69,16 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     int mOverhead = 3;
     private int mYear;
     private int mMonth;
-    private int mDay;
+    private long mDay;
+    private long mTime;
 
     PresentationMode mDisplayMode;
     INote mNote;
     NotesContentProviderProxy proxyContentProvider;
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
+    private Integer mHour;
+    private Integer mMinute;
 
     enum EditorType {
         EDIT,
@@ -88,25 +101,52 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private void  showDatePicker() {
         // get the current date
-        final Calendar c = Calendar.getInstance();
-        mYear = c.get(Calendar.YEAR);
-        mMonth = c.get(Calendar.MONTH);
-        mDay = c.get(Calendar.DAY_OF_MONTH);
-        Log.d(TAG, "Date set");
-        Dialog datePickerDialog = new DatePickerDialog(mContext, new DatePickerDialog.OnDateSetListener() {
+//        final Calendar c = Calendar.getInstance();
+//        mYear = c.get(Calendar.YEAR);
+//        mMonth = c.get(Calendar.MONTH);
+//        mDay = c.get(Calendar.DAY_OF_MONTH);
+//        Log.d(TAG, "Date set");
+//        Dialog datePickerDialog = new DatePickerDialog(mContext, new DatePickerDialog.OnDateSetListener() {
+//            @Override
+//            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+//                mYear = year;
+//                mMonth = monthOfYear;
+//                mDay = dayOfMonth;
+//                updateDisplay();
+//            }
+//        }, mYear, +mMonth, mDay);mContext
+//        datePickerDialog.show();
+
+        final View dialogView = View.inflate(mContext, R.layout.date_time_picker, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
+
+        dialogView.findViewById(R.id.date_time_set).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                mYear = year;
-                mMonth = monthOfYear;
-                mDay = dayOfMonth;
-                updateDisplay();
-            }
-        }, mYear, mMonth, mDay);
-        datePickerDialog.show();
+            public void onClick(View view) {
+                DatePicker datePicker = (DatePicker) dialogView.findViewById(R.id.date_picker);
+                TimePicker timePicker = (TimePicker) dialogView.findViewById(R.id.time_picker);
+                Calendar calendar = new GregorianCalendar(datePicker.getYear(),
+                        datePicker.getMonth(),
+                        datePicker.getDayOfMonth(),
+                        timePicker.getCurrentHour(),
+                        timePicker.getCurrentMinute());
+
+                mTime = calendar.getTimeInMillis();
+                mDay = datePicker.getDayOfMonth();
+                mYear = datePicker.getYear();
+                mMonth = datePicker.getMonth();
+                mHour = timePicker.getCurrentHour();
+                mMinute = timePicker.getCurrentMinute();
+
+                alertDialog.dismiss();
+                updateReminder();
+                setAlarm();
+            }});
+        alertDialog.setView(dialogView);
+        alertDialog.show();
     }
 
-    private void updateDisplay() {
-
+    private void updateReminder() {
       IReminder reminder = mNote.getReminder();
         reminder.setDate(
                 new StringBuilder()
@@ -116,6 +156,23 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         .append(mYear).append(" ").toString());
         reminder.set(true);
         notifyDataSetChanged();
+    }
+    void setAlarm() {
+        Log.d(TAG,"Alarm is being set!!");
+        alarmMgr = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(mContext, AlarmReceiver.class);
+        alarmIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+
+        // Set the alarm to start at 8:30 a.m.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 50);
+
+// setRepeating() lets you specify a precise custom interval--in this case,
+// 20 minutes.
+        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                1000 * 60 * 20, alarmIntent);
     }
 
     private void showLocationPicker() {
@@ -247,7 +304,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 int pos = mNote.addElement(emptyItem);
                 Log.d(TAG, "Position inserted " + pos);
                 //tmpHolder.itemView.setVisibility(View.INVISIBLE);
-             notifyItemInserted(pos);
+                notifyItemInserted(pos);
 
             } else if(holder instanceof ReminderViewHolder) {
                 ReminderViewHolder tmpHolder = (ReminderViewHolder)holder;
@@ -650,9 +707,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             if(isChecked) {
                 flag = Paint.STRIKE_THRU_TEXT_FLAG;
             }
-            textItem.setPaintFlags(textItem.getPaintFlags() | flag);
-
-
+            textItem.setPaintFlags(/*textItem.getPaintFlags() |*/ flag);
         }
 
         @Override
@@ -674,7 +729,15 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         public void onBindViewHolder(int position) {
             this.textItem.setText(((ListNote) mNote).getListText(position));
-            this.ticked.setChecked(((ListNote) mNote).getListTicked(position));
+            //this.ticked.setChecked(((ListNote) mNote).getListTicked(position));
+
+            boolean isChecked = ((ListNote) mNote).getListTicked(position);
+            this.ticked.setChecked(isChecked);
+            int flag = 0;
+            if(isChecked) {
+                flag = Paint.STRIKE_THRU_TEXT_FLAG;
+            }
+            textItem.setPaintFlags(textItem.getPaintFlags() |  flag);
         }
 
         @Override
@@ -772,13 +835,12 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            ListItem item =  ((ListItem) mNote.getItem(pos));
+            boolean oldChecked =  item.isTicked();
             ((ListItem) mNote.getItem(pos)).setTicked(isChecked);
-            int flag = 0;
-            if (isChecked) {
-                flag = Paint.STRIKE_THRU_TEXT_FLAG;
-            }
-            // textItem.setPaintFlags(textItem.getPaintFlags() | flag);
-           // notifyDataSetChanged();
+            if(oldChecked != isChecked)
+                 notifyDataSetChanged();
+
         }
     }
 

@@ -84,8 +84,7 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
     }
 
     public void syncToolbar(Bundle bundle) {
-        //Log.d(TAG, NoteRepository.getInstance().get(mNextIndex).toString());
-      // ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(NoteRepository.getInstance().get(mNextIndex).getTitle());
+       ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(mNote.getTitle());
     }
 
     @Override
@@ -114,6 +113,15 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter.notifyDataSetChanged();
+
+
+        mRecyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                //call smooth scroll
+                mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount()-3);
+            }
+        });
         ItemTouchHelper.Callback callback =
                 new CardItemTouchHelper(mAdapter);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
@@ -158,10 +166,10 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
         Log.d(TAG, "On resume");
         super.onResume();
         ActionBar ab =((AppCompatActivity) getActivity()).getSupportActionBar();
-//        if(ab != null) {
-//            ab.setDisplayHomeAsUpEnabled(true);
-//            ab.setDisplayShowHomeEnabled(true);
-//        }
+       if(ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+            ab.setDisplayShowHomeEnabled(true);
+        }
         Log.e(TAG, "Action bar can not be obtained - home can not be set !!!");
     }
 

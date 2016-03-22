@@ -31,6 +31,12 @@
 
         </activity>
 
+        <receiver android:name=".AlarmReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name=".contentprovider.NotesContentProvider"
             android:authorities="com.uznamska.lukas.mynotes.contentprovider" >
