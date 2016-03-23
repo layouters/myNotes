@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.uznamska.lukas.mynotes.contentprovider.NotesContentProviderProxy;
 import com.uznamska.lukas.mynotes.items.Header;
@@ -100,23 +101,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     private void  showDatePicker() {
-        // get the current date
-//        final Calendar c = Calendar.getInstance();
-//        mYear = c.get(Calendar.YEAR);
-//        mMonth = c.get(Calendar.MONTH);
-//        mDay = c.get(Calendar.DAY_OF_MONTH);
-//        Log.d(TAG, "Date set");
-//        Dialog datePickerDialog = new DatePickerDialog(mContext, new DatePickerDialog.OnDateSetListener() {
-//            @Override
-//            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-//                mYear = year;
-//                mMonth = monthOfYear;
-//                mDay = dayOfMonth;
-//                updateDisplay();
-//            }
-//        }, mYear, +mMonth, mDay);mContext
-//        datePickerDialog.show();
-
         final View dialogView = View.inflate(mContext, R.layout.date_time_picker, null);
         final AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
 
@@ -125,6 +109,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             public void onClick(View view) {
                 DatePicker datePicker = (DatePicker) dialogView.findViewById(R.id.date_picker);
                 TimePicker timePicker = (TimePicker) dialogView.findViewById(R.id.time_picker);
+                timePicker.setIs24HourView(true);
                 Calendar calendar = new GregorianCalendar(datePicker.getYear(),
                         datePicker.getMonth(),
                         datePicker.getDayOfMonth(),
@@ -157,6 +142,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         reminder.set(true);
         notifyDataSetChanged();
     }
+
     void setAlarm() {
         Log.d(TAG,"Alarm is being set!!");
         alarmMgr = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
@@ -166,16 +152,26 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         // Set the alarm to start at 8:30 a.m.
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 50);
+        calendar.set(Calendar.HOUR_OF_DAY, mHour);
+        calendar.set(Calendar.MINUTE, mMinute);
 
 // setRepeating() lets you specify a precise custom interval--in this case,
 // 20 minutes.
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                1000 * 60 * 20, alarmIntent);
+                20000, alarmIntent);
+
+        Toast.makeText(mContext, "Alarm Set", Toast.LENGTH_SHORT).show();
     }
 
+    public void cancelAlarm() {
+        AlarmManager manager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        manager.cancel(alarmIntent);
+        Toast.makeText(mContext, "Alarm Canceled", Toast.LENGTH_SHORT).show();
+    }
+
+
     private void showLocationPicker() {
+        cancelAlarm();
         Log.d(TAG,"Location set");
     }
 
