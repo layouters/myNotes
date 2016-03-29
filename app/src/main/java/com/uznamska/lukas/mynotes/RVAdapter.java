@@ -71,8 +71,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.CardListingViewHol
         int newId = converter.convert(position);
         Log.d(TAG, "delete " + position + " (" + newId + ")");
 
-        Uri toDeleteUri = Uri.parse(NotesContentProvider.NOTES_CONTENT_URI + "/" + newId);
-        proxyContentProvider.deleteNote(toDeleteUri);
+       // Uri toDeleteUri = Uri.parse(NotesContentProvider.NOTES_CONTENT_URI + "/" + newId);
+       // proxyContentProvider.deleteNote(toDeleteUri);
+        mNote.get(position).deleteFromDb(mContext);
         mNote.remove(position);
         if(mCardClickListener != null) {
             mCardClickListener.onItemDeleted();

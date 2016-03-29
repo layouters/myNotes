@@ -16,6 +16,7 @@ public class ReminderItemTable {
     public static final String COLUMN_DATE = "date";
     public static final String COLUMN_RPEAT = "repeat";
     public static final String NOTE_ID = "note_id";
+    public static final String COLUMN_TIME = "time";
 
     // Database creation SQL statement
     private static final String CREATE_TABLE = "create table "
@@ -23,6 +24,7 @@ public class ReminderItemTable {
             + "("
             + COLUMN_ID + " integer primary key autoincrement, "
             + COLUMN_DATE + " text not null, "
+            + COLUMN_TIME + " text not null, "
             + COLUMN_RPEAT + " text not null, "
             + NOTE_ID + " INT, "
             + "FOREIGN KEY(" + NOTE_ID + ") REFERENCES "

@@ -4,6 +4,9 @@
 
 package com.uznamska.lukas.mynotes.items;
 
+import android.content.Context;
+import android.net.Uri;
+
 public interface INote {
     INoteItem getItem(int pos);
     void setTitle(String title);
@@ -27,8 +30,16 @@ public interface INote {
     Iterator getSimpleItemsIterator();
     Iterator getItemsIterator();
     Iterator getListItemIterator();
+    Iterator getReminderIterator();
 
     IReminder getReminder();
     void setReminder(IReminder reminder);
+
+    void loadItems(Context context);
+    void loadReminders(Context context);
+    void saveDb(Context context, int order);
+    Uri getUri();
+    void deleteFromDb(Context context);
+    void addItemReminder(INoteItem item);
 }
 

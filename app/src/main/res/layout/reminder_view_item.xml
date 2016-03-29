@@ -18,13 +18,23 @@
         android:layout_weight="0.05"
         android:paddingTop="@dimen/abc_action_bar_content_inset_material" />
 
-    <TextView
+    <EditText
+        android:id="@+id/text_reminder_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text=""
-        android:id="@+id/text_reminder_date"
         android:layout_gravity="center|bottom"
-        android:paddingLeft="@dimen/abc_action_bar_default_height_material" />
+        android:paddingLeft="@dimen/abc_action_bar_content_inset_material" />
+
+    <EditText
+        android:id="@+id/text_reminder_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text=""
+        android:layout_gravity="center|bottom"
+        android:paddingLeft="@dimen/abc_action_bar_content_inset_material" />
+
 
 </LinearLayout>

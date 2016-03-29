@@ -95,6 +95,7 @@ public class NotesContentProvider extends ContentProvider {
         // Set the table
 
         int uriType = sURIMatcher.match(uri);
+        Log.d(TAG, "Uri type: " + uriType);
         switch (uriType) {
             case NOTES:
                 queryBuilder.setTables(NotesTable.TABLE_NOTES);
@@ -107,7 +108,6 @@ public class NotesContentProvider extends ContentProvider {
                 // so that you can return one specific note info
                 queryBuilder.appendWhere(NotesTable.COLUMN_ID + "="
                         + uri.getLastPathSegment());
-                Log.d(TAG, "notes_id " + uri.toString());
                 break;
             case NOTE_ITEMS:
                 queryBuilder.setTables(ListItemTable.TABLE_LISTITEM
@@ -209,6 +209,7 @@ public class NotesContentProvider extends ContentProvider {
                 }
                 break;
             case ITEMS:
+                rowsDeleted = sqlDB.delete(ListItemTable.TABLE_LISTITEM, selection, selectionArgs);
                 break;
             case ITEMS_ID:
                 String itemid = uri.getLastPathSegment();

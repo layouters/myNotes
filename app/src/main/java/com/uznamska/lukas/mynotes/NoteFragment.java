@@ -158,7 +158,10 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
     }
 
     private void saveState() {
-        noteUri = proxyContentProvider.saveNote(mNote, mNextIndex, noteUri);
+        Log.d(TAG, "Saving note id: " + mNote.getId() + "list order: " + mNote.getListOrder());
+        //mNote.setListOrder(mNextIndex);
+        mNote.saveDb(getContext(), mNextIndex);
+
     }
 
     @Override

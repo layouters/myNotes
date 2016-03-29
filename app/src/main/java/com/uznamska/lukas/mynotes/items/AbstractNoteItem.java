@@ -4,6 +4,8 @@
 
 package com.uznamska.lukas.mynotes.items;
 
+import android.content.Context;
+
 /**
  * Created by Anna on 2016-03-18.
  */

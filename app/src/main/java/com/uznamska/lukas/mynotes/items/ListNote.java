@@ -4,7 +4,14 @@
 
 package com.uznamska.lukas.mynotes.items;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
+
+import com.uznamska.lukas.mynotes.contentprovider.NotesContentProvider;
+import com.uznamska.lukas.mynotes.database.ListItemTable;
+import com.uznamska.lukas.mynotes.database.NotesTable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +55,7 @@ public class ListNote extends AbstractNote implements INoteForList {
         addItem(new Header());
         addItem(new ItemAdder());
         addItem(new ItemSeparator());
-        addItem(new ItemReminder());
+        addItem(new ItemReminderAdder());
     }
 
     @Override
@@ -159,5 +166,59 @@ public class ListNote extends AbstractNote implements INoteForList {
     @Override
     public boolean hasList() {
         return true;
+    }
+
+    @Override
+    public void loadItems(Context context){
+        Cursor cursorlist;
+        //Uri noteListUri = NotesContentProvider.LIST_NOTES_CONTENT_URI;
+        String selection = NotesTable.TABLE_NOTES + "." + NotesTable.COLUMN_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(getId())};
+        String[] projectionl = {
+                ListItemTable.TABLE_LISTITEM + "." + ListItemTable.COLUMN_TEXT,
+                ListItemTable.COLUMN_IS_CHECKED,
+                NotesTable.COLUMN_TITLE,
+                ListItemTable.TABLE_LISTITEM +"."+ ListItemTable.COLUMN_ID
+        };
+        //join query
+        cursorlist = context.getContentResolver().query(NotesContentProvider.LIST_NOTES_CONTENT_URI,
+                projectionl, selection, selectionArgs, null);
+        Log.d(TAG, "cursorlist " + cursorlist);
+        while (cursorlist.moveToNext()) {
+            String textitem = cursorlist.getString(0);
+            short ischecked = cursorlist.getShort(1);
+            String noteTitle = cursorlist.getString(2);
+            int id = cursorlist.getInt(3);
+            Log.d(TAG, "Loading item TextItem: " + textitem + "note id " + id + " Note title " + noteTitle);
+            ListItem item = new ListItem();
+            item.setText(textitem);
+            item.setId(id);
+            if(ischecked == 1) {
+                item.setTicked(true);
+            } else {
+                item.setTicked(false);
+            }
+            addElement(item);
+        }
+        cursorlist.close();
+    }
+
+    @Override
+    public void saveDb(Context context, int order) {
+        super.saveDb(context, order);
+        if(saver != null) {
+            saver.storeAsListNote();
+        }
+        saveReminders(context);
+    }
+
+    @Override
+    public void deleteFromDb(Context context) {
+        Uri toDeleteUri = Uri.parse(NotesContentProvider.NOTES_CONTENT_URI + "/" + getId());
+        Uri tmpuri = NotesContentProvider.LIST_CONTENT_URI;
+        String selection = ListItemTable.NOTE_ID + " = ?";
+        String[] selectionArgs = new String[]{String.valueOf(getId())};
+        context.getContentResolver().delete(tmpuri, selection, selectionArgs);
+        context.getContentResolver().delete(toDeleteUri, null, null);
     }
 }

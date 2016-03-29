@@ -27,10 +27,11 @@ import com.uznamska.lukas.mynotes.items.TextNote;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotesContentProviderProxy  implements INoteContentProvider {
+public class NotesContentProviderProxy implements INoteContentProvider {
     private static final String TAG = "Notes:ProxyContentProvider";
     Context mContext;
     NoteFactory factory;
+
     public NotesContentProviderProxy(Context context) {
         mContext = context;
         factory = new NoteFactory();
@@ -41,8 +42,7 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
         Log.d(TAG, "Get Note from uri " + uri);
         INote note = null;
         String[] projection = {NotesTable.COLUMN_TITLE,
-                NotesTable.COLUMN_TEXT, NotesTable.COLUMN_TYPE,NotesTable.COLUMN_ID };
-
+                NotesTable.COLUMN_TEXT, NotesTable.COLUMN_TYPE, NotesTable.COLUMN_ID};
 
         Cursor cursor = mContext.getContentResolver().query(uri, projection, null, null,
                 null);
@@ -60,10 +60,8 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
                     .getColumnIndexOrThrow(NotesTable.COLUMN_ID)));
 
             cursor.close();
-            if (note instanceof ListNote) {
-                loadItems((ListNote)note);
-            }
-            loadReminders(note);
+            note.loadItems(mContext);
+            note.loadReminders(mContext);
         }
         Log.d(TAG, "Return note " + note);
         return note;
@@ -73,164 +71,18 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
 
     }
 
-    interface INoteSaver {
-        void storeAsTextNote ();
-        void storeAsListNote();
-        void saveReminder();
-    }
-
-    class NoteStorer {
-
-        class NoteCreator implements INoteSaver {
-            @Override
-            public void storeAsTextNote() {
-                values.put(NotesTable.COLUMN_TYPE, "TextNote");
-                mUri = mContext.getContentResolver().insert(NotesContentProvider.NOTES_CONTENT_URI,values);
-            }
-
-            @Override
-            public void storeAsListNote() {
-                Log.d(TAG, "Store as list saver");
-                values.put(NotesTable.COLUMN_TYPE, "ListNote");
-                ContentValues val;
-                mUri = mContext.getContentResolver().insert(NotesContentProvider.NOTES_CONTENT_URI,
-                        values);
-                String idx = mUri.getLastPathSegment();
-                Iterator li = mNote.getListItemIterator();
-                while(li.hasNext()) {
-                    ListItem  item = (ListItem) li.next();
-                    val = new ContentValues();
-                    val.put(ListItemTable.COLUMN_TEXT, item .getText());
-                    val.put(ListItemTable.NOTE_ID, idx);
-                    val.put(ListItemTable.COLUMN_IS_CHECKED, item.isTicked());
-                    val.put(ListItemTable.COLUMN_LIST_ORDER, 0);
-                    mContext.getContentResolver().insert(NotesContentProvider.LIST_CONTENT_URI, val);
-                }
-            }
-
-            @Override
-            public void saveReminder() {
-                if(mUri != null && mNote.getReminder().isSet()) {
-                    String idnote = mUri.getLastPathSegment();
-                    ContentValues valuez = new ContentValues();
-                    valuez.put(ReminderItemTable.COLUMN_DATE, mNote.getReminder().getDate());
-                    valuez.put(ReminderItemTable.COLUMN_RPEAT, "NO REPEAT");
-                    valuez.put(ReminderItemTable.NOTE_ID, idnote);
-                    mContext.getContentResolver().insert(NotesContentProvider.REMINDER_CONTENT_URI, valuez);
-                }
-
-            }
-        }
-
-        class NoteUpdater implements INoteSaver {
-
-            @Override
-            public void storeAsTextNote() {
-                mContext.getContentResolver().update(mUri, values, null, null);
-            }
-
-            @Override
-            public void storeAsListNote() {
-                Log.d(TAG, "Store as list updater");
-                mContext.getContentResolver().update(mUri, values, null, null);
-                Iterator it = mNote.getListItemIterator();
-                Log.d(TAG, "Getting item iterator" + it.getItemsNumber());
-                while(it.hasNext()) {
-                    ListItem item = (ListItem)it.next();
-                    if(item.getId() > 0) {
-                        Log.d(TAG, "Updating database " + item);
-                        ContentValues vals = buildValuesFromItem(item, mNote.getId());
-                        Uri toUpdateUri = Uri.parse(NotesContentProvider.LIST_CONTENT_URI + "/" + item.getId());
-                        mContext.getContentResolver().update(toUpdateUri, vals, null, null);
-                    }
-                }
-            }
-
-            private ContentValues buildValuesFromItem(ListItem item, int noteid) {
-                ContentValues val = new ContentValues();
-                val.put(ListItemTable.COLUMN_TEXT, item.getText());
-                val.put(ListItemTable.NOTE_ID, noteid);
-                val.put(ListItemTable.COLUMN_IS_CHECKED, item.isTicked());
-                val.put(ListItemTable.COLUMN_LIST_ORDER, 0);
-                return val;
-            }
-
-            @Override
-            public void saveReminder() {
-                Log.d(TAG, "save Reminder updater");
-                if(mUri != null && mNote.getReminder().isSet()) {
-                    int reminderid = mNote.getReminder().getId();
-                    Log.d(TAG, "GETTING REMINDER ID " + reminderid);
-                    ContentValues valuez = new ContentValues();
-                    valuez.put(ReminderItemTable.COLUMN_DATE, mNote.getReminder().getDate());
-                    valuez.put(ReminderItemTable.COLUMN_RPEAT, "NO REPEAT");
-                  //
-                    if(reminderid > 0) {
-                        Uri toupdate = Uri.parse(NotesContentProvider.REMINDER_CONTENT_URI + "/" + reminderid);
-                        mContext.getContentResolver().update(toupdate, valuez, null, null);
-                    } else {
-                        valuez.put(ReminderItemTable.NOTE_ID, mNote.getId());
-                        mContext.getContentResolver().insert(NotesContentProvider.REMINDER_CONTENT_URI, valuez);
-                    }
-                }
-
-            }
-        }
-
-        private INoteSaver saver;
-        INote mNote;
-        Uri mUri;
-        int mOrder;
-        ContentValues values;
-
-        void configure(INote note, Uri uri, int listOrder) {
-            mNote = note;
-            mUri = uri;
-           // mOrder = listOrder;
-
-            values = new ContentValues();
-            values.put(NotesTable.COLUMN_CATEGORY, "none");
-            values.put(NotesTable.COLUMN_TITLE, note.getTitle());
-            values.put(NotesTable.COLUMN_TEXT, note.getText());
-            if(uri == null) {
-                values.put(NotesTable.COLUMN_LIST_ORDER, listOrder);
-                saver = new NoteCreator();
-            } else {
-                saver = new NoteUpdater();
-            }
-        }
-
-         void saveNote() {
-            if(mNote instanceof TextNote) {
-                saver.storeAsTextNote();
-            } else if (mNote instanceof ListNote) {
-                saver.storeAsListNote();
-            }
-             saver.saveReminder();
-
-        }
-
-        Uri getUri() {
-            return mUri;
-        }
-
-    }
-
-    @Override
-    public Uri saveNote(INote note, int listOrder, Uri uri) {
-        Log.d(TAG, "Store note!!! " + note);
-        if(note.getTitle() == null) {
-            return null;
-        }
-        NoteStorer storer = new NoteStorer();
-        storer.configure(note, uri, listOrder);
-        storer.saveNote();
-        return storer.getUri();
-    }
-
     @Override
     public void deleteNote(Uri uri) {
         mContext.getContentResolver().delete(uri, null, null);
+        //TODO: Delete all notes and reminders associated with the note.
+    }
+
+    public void deleteNote(INote note) {
+        int id = note.getId();
+        Uri toDeleteUri = Uri.parse(NotesContentProvider.NOTES_CONTENT_URI + "/" + id);
+
+
+        mContext.getContentResolver().delete(toDeleteUri, null, null);
         //TODO: Delete all notes and reminders associated with the note.
 
     }
@@ -264,14 +116,14 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
 
     public List<INote> loadListOfNotes() {
         List<INote> list = new ArrayList<INote>();
-        String[] projection = { NotesTable.COLUMN_TYPE,
-                                NotesTable.COLUMN_TITLE,
-                                NotesTable.COLUMN_TEXT,
-                                NotesTable.COLUMN_ID,
-                                NotesTable.COLUMN_LIST_ORDER};
+        String[] projection = {NotesTable.COLUMN_TYPE,
+                NotesTable.COLUMN_TITLE,
+                NotesTable.COLUMN_TEXT,
+                NotesTable.COLUMN_ID,
+                NotesTable.COLUMN_LIST_ORDER};
         Cursor tmp_cursor = mContext.getContentResolver().query(NotesContentProvider.NOTES_CONTENT_URI, projection, null,
                 null, NotesTable.COLUMN_LIST_ORDER + " ASC");
-        if(tmp_cursor != null) {
+        if (tmp_cursor != null) {
             while (tmp_cursor.moveToNext()) {
                 String titler = tmp_cursor.getString(tmp_cursor.getColumnIndexOrThrow
                         (NotesTable.COLUMN_TITLE));
@@ -283,81 +135,20 @@ public class NotesContentProviderProxy  implements INoteContentProvider {
                         (NotesTable.COLUMN_ID));
                 int listOrder = tmp_cursor.getInt(tmp_cursor.getColumnIndexOrThrow
                         (NotesTable.COLUMN_LIST_ORDER));
-                INote note  = factory.getNote(type);
+                INote note = factory.getNote(type);
                 Log.d(TAG, "type: " + type);
                 note.setTitle(titler);
                 note.setText(text);
                 note.setId(id);
                 note.setListOrder(listOrder);
-                if(note instanceof ListNote) {
-                    loadItems((ListNote)note);
-                }
+                note.loadItems(mContext);
                 list.add(note);
             }
         }
         int next = 0;
-        if(list.size() > 0) {
+        if (list.size() > 0) {
             next = list.get(list.size() - 1).getListOrder() + 1;
         }
         return list;
     }
-
-    private void loadItems(ListNote note) {
-        Cursor cursorlist;
-        //Uri noteListUri = NotesContentProvider.LIST_NOTES_CONTENT_URI;
-        String selection = NotesTable.TABLE_NOTES + "." + NotesTable.COLUMN_ID +" = ?";
-        String[] selectionArgs = {String.valueOf(note.getId())};
-        String[] projectionl = {
-                ListItemTable.TABLE_LISTITEM + "." + ListItemTable.COLUMN_TEXT,
-                ListItemTable.COLUMN_IS_CHECKED,
-                NotesTable.COLUMN_TITLE,
-                ListItemTable.TABLE_LISTITEM +"."+ ListItemTable.COLUMN_ID
-        };
-        cursorlist = mContext.getContentResolver().query(NotesContentProvider.LIST_NOTES_CONTENT_URI,
-                                                         projectionl, selection, selectionArgs, null);
-        Log.d(TAG, "cursorlist " + cursorlist);
-        while (cursorlist.moveToNext()) {
-            String textitem = cursorlist.getString(0);
-            short ischecked = cursorlist.getShort(1);
-            String noteTitle = cursorlist.getString(2);
-            int id = cursorlist.getInt(3);
-            Log.d(TAG, "Loading item TextItem: " + textitem + "note id " + id + " Note title " + noteTitle);
-            ListItem item = new ListItem();
-            item.setText(textitem);
-            item.setId(id);
-            if(ischecked == 1) {
-                item.setTicked(true);
-            } else {
-                item.setTicked(false);
-            }
-            note.addElement(item);
-        }
-        cursorlist.close();
-    }
-
-    private void loadReminders(INote note) {
-        Cursor cursorlist;
-        String selection = NotesTable.TABLE_NOTES + "." + NotesTable.COLUMN_ID +" = ?";
-        String[] selectionArgs = {String.valueOf(note.getId())};
-        String[] projection = {
-                ReminderItemTable.TABLE_REMINDERITEMS + "." + ReminderItemTable.COLUMN_DATE,
-                ReminderItemTable.TABLE_REMINDERITEMS + "." + ReminderItemTable.COLUMN_ID,
-                NotesTable.COLUMN_TITLE
-        };
-        cursorlist = mContext.getContentResolver().query(NotesContentProvider.REMINDER_CONTENT_URI,
-                projection, selection, selectionArgs, null);
-
-        while (cursorlist.moveToNext()) {
-            String reminderDate = cursorlist.getString(0);
-            int remId = cursorlist.getInt(1);
-            String noteTitle = cursorlist.getString(1);
-            Log.d(TAG, "DateItem: " + reminderDate + " Note title " + noteTitle);
-            IReminder r = note.getReminder();
-            r.setDate(reminderDate);
-            r.setId(remId);
-        }
-        cursorlist.close();
-    }
-
-
 }

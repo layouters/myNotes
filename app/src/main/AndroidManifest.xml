@@ -44,6 +44,8 @@
             </intent-filter>
         </receiver>
 
+        <service android:name=".AlarmService"></service>
+
         <provider
             android:name=".contentprovider.NotesContentProvider"
             android:authorities="com.uznamska.lukas.mynotes.contentprovider" >

@@ -15,6 +15,6 @@ public interface INoteContentProvider {
     INote getNoteFromUri(Uri uri);
     void deleteItem(Uri uri);
 
-    Uri saveNote(INote note , int listOder, Uri uri);
+   // Uri saveNote(INote note , int listOder, Uri uri);
     void deleteNote(Uri uri);
 }

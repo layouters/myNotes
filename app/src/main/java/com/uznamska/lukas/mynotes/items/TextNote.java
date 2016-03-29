@@ -5,10 +5,12 @@
 package com.uznamska.lukas.mynotes.items;
 
 
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import com.uznamska.lukas.mynotes.contentprovider.NotesContentProvider;
 import com.uznamska.lukas.mynotes.database.NotesTable;
 
 import java.util.ArrayList;
@@ -21,7 +23,7 @@ public class TextNote extends AbstractNote implements INote {
         setItems(new ArrayList<INoteItem>());
         addItem(new Header());
         addItem(new ItemSeparator());
-        addItem(new ItemReminder());
+        addItem(new ItemReminderAdder());
     }
 
     @Override
@@ -43,5 +45,21 @@ public class TextNote extends AbstractNote implements INote {
     @Override
     public Iterator getListItemIterator() {
         return null;
+    }
+
+    @Override
+    public void saveDb(Context context, int order) {
+        super.saveDb(context, order);
+        if(saver != null) {
+            saver.storeAsTextNote();
+        }
+        saveReminders(context);
+    }
+
+    @Override
+    public void deleteFromDb(Context context) {
+        Uri toDeleteUri = Uri.parse(NotesContentProvider.NOTES_CONTENT_URI + "/" + getId());
+        context.getContentResolver().delete(toDeleteUri, null, null);
+
     }
 }
