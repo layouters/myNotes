@@ -280,7 +280,7 @@ public abstract class AbstractNote  implements INote {
     @Override
     public void loadReminders(Context context) {
         Cursor cursorlist;
-        String selection = NotesTable.TABLE_NOTES + "." + NotesTable.COLUMN_ID +" = ?";
+        String selection = NotesTable.TABLE_NAME + "." + NotesTable.COLUMN_ID +" = ?";
         String[] selectionArgs = {String.valueOf(getId())};
         String[] projection = {
                 ReminderItemTable.TABLE_REMINDERITEMS + "." + ReminderItemTable.COLUMN_DATE,
@@ -321,7 +321,9 @@ public abstract class AbstractNote  implements INote {
 
     @Override
     public void saveDb(Context context, int order) {
-        if (getTitle() == null) {
+        if (getTitle() == null || getTitle().equals("")) {
+            Log.d(TAG, "Title is null");
+            saver = null;
             return;
         }
         int listOrder = order;

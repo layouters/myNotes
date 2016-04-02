@@ -22,4 +22,14 @@ public abstract class AbstractNoteItem implements INoteItem{
     public void setId(int id) {
         mId = id;
     }
+
+    @Override
+    public void saveDb(Context context) {
+
+    }
+
+    @Override
+    public void deleteFromDb(Context context) {
+
+    }
 }

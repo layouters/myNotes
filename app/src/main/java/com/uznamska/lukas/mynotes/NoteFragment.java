@@ -158,7 +158,8 @@ public class NoteFragment extends Fragment implements MainActivity.BackPressedLi
     }
 
     private void saveState() {
-        Log.d(TAG, "Saving note id: " + mNote.getId() + "list order: " + mNote.getListOrder());
+        Log.d(TAG, "Saving note id: " + mNote.getId() + "list order: " + mNote.getListOrder() +
+        " titler " +  mNote.getTitle());
         //mNote.setListOrder(mNextIndex);
         mNote.saveDb(getContext(), mNextIndex);
 

@@ -7,7 +7,7 @@ import android.util.Log;
  * Created by Anna on 2016-03-06.
  */
 public class NotesTable {
-    public static final String TABLE_NOTES = "notes";
+    public static final String TABLE_NAME = "notes";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_CATEGORY = "category";
     public static final String COLUMN_TITLE = "title";
@@ -17,7 +17,7 @@ public class NotesTable {
 
     // Database creation SQL statement
     private static final String DATABASE_CREATE = "create table "
-            + TABLE_NOTES
+            + TABLE_NAME
             + "("
             + COLUMN_ID + " integer primary key autoincrement, "
             + COLUMN_CATEGORY + " text not null, "
@@ -36,7 +36,7 @@ public class NotesTable {
         Log.w(NotesTable.class.getName(), "Upgrading database from version "
                 + oldVersion + " to " + newVersion
                 + ", which will destroy all the old data");
-        database.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTES);
+        database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(database);
     }
 }

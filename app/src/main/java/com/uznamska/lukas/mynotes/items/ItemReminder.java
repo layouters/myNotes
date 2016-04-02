@@ -79,7 +79,7 @@ public class ItemReminder extends AbstractNoteItem implements IReminder {
 
     @Override
     public String getRepeat() {
-        return null;
+        return "NONE";
     }
 
     @Override
@@ -97,6 +97,7 @@ public class ItemReminder extends AbstractNoteItem implements IReminder {
         if (getId() == 0) {
             Log.d(TAG, "Insert reminder");
             int idnote = getNoteId();
+            Log.d(TAG, "Id note " + idnote);
             ContentValues valuez = new ContentValues();
             valuez.put(ReminderItemTable.COLUMN_DATE, getDate());
             valuez.put(ReminderItemTable.COLUMN_TIME, getTime());

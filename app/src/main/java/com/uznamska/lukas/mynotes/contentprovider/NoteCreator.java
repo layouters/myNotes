@@ -12,16 +12,12 @@ import com.uznamska.lukas.mynotes.items.INote;
 import com.uznamska.lukas.mynotes.items.Iterator;
 import com.uznamska.lukas.mynotes.items.ListItem;
 
-/**
- * Created by Anna on 2016-03-27.
- */
 public class NoteCreator implements INoteSaver {
 
     INote mNote;
     Uri mUri;
     ContentValues values;
     Context mContext;
-
 
     public Uri getUri() {
         return mUri;
@@ -59,6 +55,8 @@ public class NoteCreator implements INoteSaver {
     public void storeAsTextNote() {
         values.put(NotesTable.COLUMN_TYPE, "TextNote");
         mUri = mContext.getContentResolver().insert(NotesContentProvider.NOTES_CONTENT_URI, values);
+        String idx = mUri.getLastPathSegment();
+        mNote.setId(Integer.parseInt(idx));
     }
 
     @Override
@@ -81,17 +79,4 @@ public class NoteCreator implements INoteSaver {
             mContext.getContentResolver().insert(NotesContentProvider.LIST_CONTENT_URI, val);
         }
     }
-
- //   public void saveReminder() {
-//        if (mUri != null && mNote.getReminder().isSet()) {
-//            String idnote = mUri.getLastPathSegment();
-//            ContentValues valuez = new ContentValues();
-//            valuez.put(ReminderItemTable.COLUMN_DATE, mNote.getReminder().getDate());
-//            valuez.put(ReminderItemTable.COLUMN_RPEAT, "NO REPEAT");
-//            valuez.put(ReminderItemTable.NOTE_ID, idnote);
-//            mContext.getContentResolver().insert(NotesContentProvider.REMINDER_CONTENT_URI, valuez);
-//        }
-//
-//    }
-//
 }

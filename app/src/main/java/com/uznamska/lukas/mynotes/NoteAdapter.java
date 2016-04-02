@@ -5,11 +5,8 @@
 package com.uznamska.lukas.mynotes;
 
 import android.app.AlarmManager;
-import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Paint;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
@@ -27,7 +24,6 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -39,7 +35,6 @@ import com.uznamska.lukas.mynotes.items.INote;
 import com.uznamska.lukas.mynotes.items.INoteItem;
 
 import com.uznamska.lukas.mynotes.items.IReminder;
-import com.uznamska.lukas.mynotes.items.IUpdateTextListener;
 import com.uznamska.lukas.mynotes.items.ItemAdder;
 import com.uznamska.lukas.mynotes.items.ItemReminder;
 import com.uznamska.lukas.mynotes.items.ItemReminderAdder;
@@ -47,10 +42,9 @@ import com.uznamska.lukas.mynotes.items.ItemSeparator;
 import com.uznamska.lukas.mynotes.items.Iterator;
 import com.uznamska.lukas.mynotes.items.ListItem;
 import com.uznamska.lukas.mynotes.items.ListNote;
+import com.uznamska.lukas.mynotes.utils.DateUtils;
 
-import java.security.Timestamp;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,7 +59,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     class ContextReminderListener implements PopupMenu.OnMenuItemClickListener {
         private int mYear;
         private int mMonth;
-        private long mDay;
+        private int mDay;
         private long mTime;
         private long mHour;
         private long mMinute;
@@ -117,13 +111,8 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         private void updateReminder() {
             IReminder reminder = new ItemReminder();
-            reminder.setDate(
-                    new StringBuilder()
-                            // Month is 0 based so add 1
-                            .append(mMonth + 1).append("-")
-                            .append(mDay).append("-")
-                            .append(mYear).append(" ").toString());
-            reminder.setTime(new StringBuilder().append(mHour).append(":").append(mMinute).toString());
+            reminder.setDate(DateUtils.getStringDate(mYear, mMonth, mDay));
+            reminder.setTime(DateUtils.getTimeString(mHour, mMinute));
             reminder.set(true);
             //reminder.setNoteId(mNote.getId());
             mNote.addItemReminder((INoteItem)reminder);
@@ -156,28 +145,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         EDIT,
         NEW
     }
-
-
-
-//    void setAlarm() {
-//        Log.d(TAG,"Alarm is being set!!");
-//        alarmMgr = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
-//        Intent intent = new Intent(mContext, AlarmReceiver.class);
-//        alarmIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
-//
-//        // Set the alarm to start at 8:30 a.m.
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTimeInMillis(System.currentTimeMillis());
-//        calendar.set(Calendar.HOUR_OF_DAY, mHour);
-//        calendar.set(Calendar.MINUTE, mMinute);
-//
-//// setRepeating() lets you specify a precise custom interval--in this case,
-//// 20 minutes.
-//        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-//                20000, alarmIntent);
-//
-//        Toast.makeText(mContext, "Alarm Set", Toast.LENGTH_SHORT).show();
-//    }
 
     public void cancelAlarm() {
         AlarmManager manager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -273,9 +240,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public int getItemCount() {
-           // Log.d(TAG, "this is size in  rich mode" + mNote.getSize());
-           // Log.d(TAG, "this is note in  rich mode" + mNote);
-           // Log.d(TAG, "Procedure: getitemcoun");
             return mNote.getItemsIterator().getItemsNumber();
         }
 
@@ -830,7 +794,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     public class AdderItemViewHolder extends RecyclerView.ViewHolder implements IMovementInformator,
-                                    IBindActionTaker, IUpdateTextListener {
+                                    IBindActionTaker {
 
         public AdderItemViewHolder(View itemView) {
             super(itemView);
@@ -854,11 +818,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public void setViewClickListener(View.OnClickListener listener) {
             itemView.setOnClickListener(listener);
             itemView.setTag(this);
-        }
-
-        @Override
-        public void onUpdate() {
-            itemView.setVisibility(View.VISIBLE);
         }
     }
 

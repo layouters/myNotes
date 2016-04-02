@@ -28,7 +28,7 @@ public class ReminderItemTable {
             + COLUMN_RPEAT + " text not null, "
             + NOTE_ID + " INT, "
             + "FOREIGN KEY(" + NOTE_ID + ") REFERENCES "
-            + NotesTable.TABLE_NOTES + "(_id) " + ")";
+            + NotesTable.TABLE_NAME + "(_id) " + ")";
 
     public static void onCreate(SQLiteDatabase database) {
         database.execSQL(CREATE_TABLE);

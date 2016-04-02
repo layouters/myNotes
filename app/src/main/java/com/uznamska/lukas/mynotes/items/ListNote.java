@@ -172,7 +172,7 @@ public class ListNote extends AbstractNote implements INoteForList {
     public void loadItems(Context context){
         Cursor cursorlist;
         //Uri noteListUri = NotesContentProvider.LIST_NOTES_CONTENT_URI;
-        String selection = NotesTable.TABLE_NOTES + "." + NotesTable.COLUMN_ID + " = ?";
+        String selection = NotesTable.TABLE_NAME + "." + NotesTable.COLUMN_ID + " = ?";
         String[] selectionArgs = {String.valueOf(getId())};
         String[] projectionl = {
                 ListItemTable.TABLE_LISTITEM + "." + ListItemTable.COLUMN_TEXT,
@@ -208,8 +208,9 @@ public class ListNote extends AbstractNote implements INoteForList {
         super.saveDb(context, order);
         if(saver != null) {
             saver.storeAsListNote();
+
+            saveReminders(context);
         }
-        saveReminders(context);
     }
 
     @Override

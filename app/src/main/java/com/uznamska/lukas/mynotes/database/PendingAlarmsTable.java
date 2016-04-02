@@ -8,6 +8,7 @@ public class PendingAlarmsTable {
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_TIME = "time";
     public static final String COLUMN_REMINDER_ID = "reminder_id";
+    public static final String COLUMN_STATUS = "status";
 
     private static final String CREATE_TABLE = "create table "
             + TABLE_NAME
@@ -15,6 +16,7 @@ public class PendingAlarmsTable {
             + COLUMN_ID + " integer primary key autoincrement, "
             + COLUMN_TIME + " integer not null, "
             + COLUMN_REMINDER_ID + " INT, "
+            + COLUMN_STATUS + " text not null, "
             + "FOREIGN KEY(" + COLUMN_REMINDER_ID + ") REFERENCES "
             + ReminderItemTable.TABLE_REMINDERITEMS + "(_id) " + ")";
 

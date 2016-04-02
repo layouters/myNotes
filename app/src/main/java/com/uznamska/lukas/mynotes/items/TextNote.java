@@ -52,8 +52,8 @@ public class TextNote extends AbstractNote implements INote {
         super.saveDb(context, order);
         if(saver != null) {
             saver.storeAsTextNote();
+            saveReminders(context);
         }
-        saveReminders(context);
     }
 
     @Override

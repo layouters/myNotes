@@ -20,6 +20,7 @@ import android.util.Log;
 import com.uznamska.lukas.mynotes.database.ListItemTable;
 import com.uznamska.lukas.mynotes.database.NotesDatabaseHelper;
 import com.uznamska.lukas.mynotes.database.NotesTable;
+import com.uznamska.lukas.mynotes.database.PendingAlarmsTable;
 import com.uznamska.lukas.mynotes.database.ReminderItemTable;
 
 import java.util.Arrays;
@@ -41,11 +42,13 @@ public class NotesContentProvider extends ContentProvider {
     private static final int NOTE_ITEMS_ID = 60;
     private static final int REMINDER_ITEMS = 70;
     private static final int REMINDER_ITEMS_ID = 80;
+    private static final int PENDING_ALARM_ITEMS = 90;
 
     private static final String AUTHORITY = "com.uznamska.lukas.mynotes.contentprovider";
-    private static final String NOTES_BASE_PATH = NotesTable.TABLE_NOTES;
+    private static final String NOTES_BASE_PATH = NotesTable.TABLE_NAME;
     private static final String ITEM_BASE_PATH = ListItemTable.TABLE_LISTITEM;
     private static final String REMINDER_BASE_PATH = ReminderItemTable.TABLE_REMINDERITEMS;
+    private static final String PENDING_ALARM_BASE_PATH = PendingAlarmsTable.TABLE_NAME;
 
     public static final Uri NOTES_CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + NOTES_BASE_PATH);
@@ -53,6 +56,8 @@ public class NotesContentProvider extends ContentProvider {
             + "/" + ITEM_BASE_PATH);
     public static final Uri REMINDER_CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + REMINDER_BASE_PATH);
+    public static final Uri PENDING_ALARM_CONTENT_URI = Uri.parse("content://" + AUTHORITY
+            + "/" + PENDING_ALARM_BASE_PATH);
     //lists + note JOIN TABLES
     public static final Uri LIST_NOTES_CONTENT_URI = Uri.parse("content://" + AUTHORITY
             + "/" + "listnote");
@@ -74,6 +79,7 @@ public class NotesContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, "listnote" + "/#", NOTE_ITEMS_ID);
         sURIMatcher.addURI(AUTHORITY, REMINDER_BASE_PATH, REMINDER_ITEMS);
         sURIMatcher.addURI(AUTHORITY, REMINDER_BASE_PATH + "/#", REMINDER_ITEMS_ID);
+        sURIMatcher.addURI(AUTHORITY, PENDING_ALARM_BASE_PATH, PENDING_ALARM_ITEMS);
     }
 
     @Override
@@ -90,20 +96,18 @@ public class NotesContentProvider extends ContentProvider {
                         String sortOrder) {
         // Uisng SQLiteQueryBuilder instead of query() method
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-        // check if the caller has requested a column which does not exists
-        //checkColumns(projection);
-        // Set the table
+
 
         int uriType = sURIMatcher.match(uri);
         Log.d(TAG, "Uri type: " + uriType);
         switch (uriType) {
             case NOTES:
-                queryBuilder.setTables(NotesTable.TABLE_NOTES);
+                queryBuilder.setTables(NotesTable.TABLE_NAME);
                 //return all notes
                 Log.d(TAG, "notes " + queryBuilder);
                 break;
             case NOTES_ID:
-                queryBuilder.setTables(NotesTable.TABLE_NOTES);
+                queryBuilder.setTables(NotesTable.TABLE_NAME);
                 // adding the ID to the original query
                 // so that you can return one specific note info
                 queryBuilder.appendWhere(NotesTable.COLUMN_ID + "="
@@ -112,21 +116,24 @@ public class NotesContentProvider extends ContentProvider {
             case NOTE_ITEMS:
                 queryBuilder.setTables(ListItemTable.TABLE_LISTITEM
                         + " INNER JOIN "
-                        +  NotesTable.TABLE_NOTES
+                        +  NotesTable.TABLE_NAME
                         + " ON "
                         + ListItemTable.NOTE_ID
                         + " = "
-                        + (NotesTable.TABLE_NOTES + "." + NotesTable.COLUMN_ID));
+                        + (NotesTable.TABLE_NAME + "." + NotesTable.COLUMN_ID));
                 break;
             case REMINDER_ITEMS:
                 queryBuilder.setTables(ReminderItemTable.TABLE_REMINDERITEMS
                         + " INNER JOIN "
-                        +  NotesTable.TABLE_NOTES
+                        +  NotesTable.TABLE_NAME
                         + " ON "
                         + ReminderItemTable.NOTE_ID
                         + " = "
-                        + (NotesTable.TABLE_NOTES + "." + NotesTable.COLUMN_ID));
+                        + (NotesTable.TABLE_NAME + "." + NotesTable.COLUMN_ID));
                break;
+
+            case REMINDER_ITEMS_ID:
+                break;
 
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -156,7 +163,7 @@ public class NotesContentProvider extends ContentProvider {
         long id = 0;
         switch (uriType) {
             case NOTES:
-                id = sqlDB.insert(NotesTable.TABLE_NOTES, null, values);
+                id = sqlDB.insert(NotesTable.TABLE_NAME, null, values);
                 Log.d(TAG, "Insert data  id " + id);
                 if (id > 0) {
                     _uri = ContentUris.withAppendedId(NOTES_CONTENT_URI, id);
@@ -177,6 +184,13 @@ public class NotesContentProvider extends ContentProvider {
                     getContext().getContentResolver().notifyChange(_uri, null);
                 }
                 break;
+            case PENDING_ALARM_ITEMS:
+                id = sqlDB.insert(PendingAlarmsTable.TABLE_NAME, null, values);
+                if (id > 0) {
+                    _uri = ContentUris.withAppendedId(PENDING_ALARM_CONTENT_URI, id);
+                    getContext().getContentResolver().notifyChange(_uri, null);
+                }
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -191,18 +205,18 @@ public class NotesContentProvider extends ContentProvider {
         int rowsDeleted = 0;
         switch (uriType) {
             case NOTES:
-                rowsDeleted = sqlDB.delete(NotesTable.TABLE_NOTES, selection,
+                rowsDeleted = sqlDB.delete(NotesTable.TABLE_NAME, selection,
                         selectionArgs);
                 break;
             case NOTES_ID:
                 String id = uri.getLastPathSegment();
                 Log.d(TAG, "this is note_id " + id + "to delete");
                 if (TextUtils.isEmpty(selection)) {
-                    rowsDeleted = sqlDB.delete(NotesTable.TABLE_NOTES,
+                    rowsDeleted = sqlDB.delete(NotesTable.TABLE_NAME,
                             NotesTable.COLUMN_ID + "=" + id,
                             null);
                 } else {
-                    rowsDeleted = sqlDB.delete(NotesTable.TABLE_NOTES,
+                    rowsDeleted = sqlDB.delete(NotesTable.TABLE_NAME,
                             NotesTable.COLUMN_ID + "=" + id
                                     + " and " + selection,
                             selectionArgs);
@@ -239,7 +253,7 @@ public class NotesContentProvider extends ContentProvider {
         int rowsUpdated = 0;
         switch (uriType) {
             case NOTES:
-                rowsUpdated = sqlDB.update(NotesTable.TABLE_NOTES,
+                rowsUpdated = sqlDB.update(NotesTable.TABLE_NAME,
                         values,
                         selection,
                         selectionArgs);
@@ -247,12 +261,12 @@ public class NotesContentProvider extends ContentProvider {
             case NOTES_ID:
                 String id = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(selection)) {
-                    rowsUpdated = sqlDB.update(NotesTable.TABLE_NOTES,
+                    rowsUpdated = sqlDB.update(NotesTable.TABLE_NAME,
                             values,
                             NotesTable.COLUMN_ID + "=" + id,
                             null);
                 } else {
-                    rowsUpdated = sqlDB.update(NotesTable.TABLE_NOTES,
+                    rowsUpdated = sqlDB.update(NotesTable.TABLE_NAME,
                             values,
                             NotesTable.COLUMN_ID + "=" + id
                                     + " and "

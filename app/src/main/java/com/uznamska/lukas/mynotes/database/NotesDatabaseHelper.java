@@ -26,6 +26,7 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
         NotesTable.onCreate(db);
         ListItemTable.onCreate(db);
         ReminderItemTable.onCreate(db);
+        PendingAlarmsTable.onCreate(db);
     }
 
     @Override
@@ -33,5 +34,6 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
         NotesTable.onUpgrade(db, oldVersion, newVersion);
         ListItemTable.onUpgrade(db, oldVersion, newVersion);
         ReminderItemTable.onUpgrade(db, oldVersion, newVersion);
+        PendingAlarmsTable.onUpgrade(db, oldVersion, newVersion);
     }
 }
