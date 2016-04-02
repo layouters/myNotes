@@ -1,8 +1,12 @@
 package com.uznamska.lukas.mynotes;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.util.Log;
 
 import com.uznamska.lukas.mynotes.database.PendingAlarmsTable;
@@ -35,18 +39,47 @@ public class AlarmService extends IntentService {
 
     }
 
-    class CreateCommand implements ICommand {
+    abstract class AbstractCommand implements ICommand{
+        protected void reSetAlarms(String ...args) {
+            Intent i;
+            PendingIntent pi;
+            AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            Cursor pendings = ItemPendingAlarm.getRelatedAlarms(getApplicationContext(), args);
+            if (pendings != null) {
+                while (pendings.moveToNext()) {
+                    long now = System.currentTimeMillis();
+                    long time, diff;
+                    i = new Intent(getApplicationContext(), AlarmReceiver.class);
+                    i.putExtra(PendingAlarmsTable.COLUMN_ID, pendings.getInt(pendings.getColumnIndex(PendingAlarmsTable.COLUMN_ID)));
+                    i.putExtra(PendingAlarmsTable.COLUMN_REMINDER_ID,
+                            pendings.getInt(pendings.getColumnIndex(PendingAlarmsTable.COLUMN_REMINDER_ID)));
+
+                    pi = PendingIntent.getBroadcast(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    time = pendings.getLong(pendings.getColumnIndex(PendingAlarmsTable.COLUMN_TIME));
+                    diff = time - now + (long)DateUtils.MIN;
+                    if (diff > 0 && diff < DateUtils.YEAR) {
+                        am.set(AlarmManager.RTC_WAKEUP, time, pi);
+                    }
+                }
+                pendings.close();
+            }
+        }
+    }
+
+    class CreateCommand extends AbstractCommand {
 
         @Override
         public void execute(String ...args) {
             Log.d(TAG, "I will be saving pending alarm to database");
 
-            String reminderId = (args!=null && args.length > 0) ? args[0] : null;
+            String reminderId = (args != null && args.length > 0) ? args[0] : null;
             ItemReminder reminder = new ItemReminder();
             reminder.setId(Integer.parseInt(reminderId));
             reminder.loadFromDB(getApplicationContext());
 
             savePendingAlarmForReminder(reminder);
+            reSetAlarms(reminderId);
         }
 
         private void savePendingAlarmForReminder(ItemReminder reminder) {
@@ -77,7 +110,7 @@ public class AlarmService extends IntentService {
         }
     }
 
-    class RefreshCommand implements ICommand {
+    class RefreshCommand extends AbstractCommand {
 
         @Override
         public void execute(String ...args) {
@@ -85,7 +118,7 @@ public class AlarmService extends IntentService {
         }
     }
 
-    class CancelCommand implements ICommand {
+    class CancelCommand extends AbstractCommand {
 
         @Override
         public void execute(String ...args) {

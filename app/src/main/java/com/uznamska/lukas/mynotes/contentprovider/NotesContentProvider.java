@@ -43,6 +43,7 @@ public class NotesContentProvider extends ContentProvider {
     private static final int REMINDER_ITEMS = 70;
     private static final int REMINDER_ITEMS_ID = 80;
     private static final int PENDING_ALARM_ITEMS = 90;
+    private static final int PENDING_ALARM_ITEMS_ID = 100;
 
     private static final String AUTHORITY = "com.uznamska.lukas.mynotes.contentprovider";
     private static final String NOTES_BASE_PATH = NotesTable.TABLE_NAME;
@@ -80,6 +81,7 @@ public class NotesContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, REMINDER_BASE_PATH, REMINDER_ITEMS);
         sURIMatcher.addURI(AUTHORITY, REMINDER_BASE_PATH + "/#", REMINDER_ITEMS_ID);
         sURIMatcher.addURI(AUTHORITY, PENDING_ALARM_BASE_PATH, PENDING_ALARM_ITEMS);
+        sURIMatcher.addURI(AUTHORITY, PENDING_ALARM_BASE_PATH + "/#", PENDING_ALARM_ITEMS_ID);
     }
 
     @Override
@@ -96,7 +98,6 @@ public class NotesContentProvider extends ContentProvider {
                         String sortOrder) {
         // Uisng SQLiteQueryBuilder instead of query() method
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-
 
         int uriType = sURIMatcher.match(uri);
         Log.d(TAG, "Uri type: " + uriType);
@@ -116,7 +117,7 @@ public class NotesContentProvider extends ContentProvider {
             case NOTE_ITEMS:
                 queryBuilder.setTables(ListItemTable.TABLE_LISTITEM
                         + " INNER JOIN "
-                        +  NotesTable.TABLE_NAME
+                        + NotesTable.TABLE_NAME
                         + " ON "
                         + ListItemTable.NOTE_ID
                         + " = "
@@ -134,7 +135,9 @@ public class NotesContentProvider extends ContentProvider {
 
             case REMINDER_ITEMS_ID:
                 break;
-
+            case PENDING_ALARM_ITEMS:
+                queryBuilder.setTables(PendingAlarmsTable.TABLE_NAME);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -306,6 +309,14 @@ public class NotesContentProvider extends ContentProvider {
                                     + selection,
                             selectionArgs);
                 }
+                break;
+            case PENDING_ALARM_ITEMS_ID:
+                Log.d(TAG, "PENDING_ALARM_ITEMS_ID update");
+                String idPendings = uri.getLastPathSegment();
+                rowsUpdated = sqlDB.update(PendingAlarmsTable.TABLE_NAME,
+                            values,
+                            PendingAlarmsTable.COLUMN_ID + "=" + idPendings,
+                            null);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);

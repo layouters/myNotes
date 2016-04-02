@@ -3,6 +3,7 @@ package com.uznamska.lukas.mynotes.items;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
@@ -59,11 +60,42 @@ public class ItemPendingAlarm  extends AbstractNoteItem {
             Uri uri = context.getContentResolver().insert(NotesContentProvider.PENDING_ALARM_CONTENT_URI, valuez);
             String pendingId = uri.getLastPathSegment();
             Log.d(TAG, "Saving pending alarm id: " + pendingId);
+            //return Integer.parseInt(pendingId);
+        } else {
+            ContentValues cv = new ContentValues();
+            if (getReminderId() > 0)
+                cv.put(PendingAlarmsTable.COLUMN_REMINDER_ID, getReminderId());
+            if (getDateTime() > 0)
+                cv.put(PendingAlarmsTable.COLUMN_TIME, getDateTime());
+            if (getStatus()  != null)
+                cv.put(PendingAlarmsTable.COLUMN_STATUS, getStatus() );
+            Uri uri = Uri.parse(NotesContentProvider.PENDING_ALARM_CONTENT_URI + "/" + this.getId());
+            int updated = context.getContentResolver().update(uri, cv, null, null);
+           //return getId();
         }
     }
 
     @Override
     public void deleteFromDb(Context context) {
+
+    }
+
+    public static  Cursor getRelatedAlarms(Context context, String... args) {
+        String[] columns = { PendingAlarmsTable.COLUMN_ID,
+                             PendingAlarmsTable.COLUMN_REMINDER_ID,
+                             PendingAlarmsTable.COLUMN_TIME,
+                             PendingAlarmsTable.COLUMN_STATUS };
+        String selection = "1 = 1";
+        selection += (args!=null && args.length>0 && args[0]!=null) ? " AND "+
+                        PendingAlarmsTable.COLUMN_REMINDER_ID +" = "+args[0] : "";
+        selection += (args!=null && args.length>1 && args[1]!=null) ? " AND "+
+                        PendingAlarmsTable.COLUMN_TIME +" >= "+args[1] : "";
+        selection += (args!=null && args.length>2 && args[2]!=null) ? " AND "+
+                        PendingAlarmsTable.COLUMN_TIME +" <= "+args[2] : "";
+        selection += (args!=null && args.length>3 && args[3]!=null) ? " AND "+
+                        PendingAlarmsTable.COLUMN_STATUS +" = '"+args[3]+"'" : "";
+       return  context.getContentResolver().query(NotesContentProvider.PENDING_ALARM_CONTENT_URI,
+                                                    columns, selection, null, null);
 
     }
 }

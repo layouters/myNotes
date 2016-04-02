@@ -143,8 +143,10 @@ public class RecyclerViewFragment extends Fragment implements RVAdapter.OnCardCl
         mRecyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(this.getContext(), new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
-                        int id = mNotesList.get(position).getId();
-                        onCardClicked(id);
+                        if(position >= 0 ) {
+                            int id = mNotesList.get(position).getId();
+                            onCardClicked(id);
+                        }
                     }
                 })
         );

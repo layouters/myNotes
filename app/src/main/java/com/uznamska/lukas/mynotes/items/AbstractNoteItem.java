@@ -25,7 +25,7 @@ public abstract class AbstractNoteItem implements INoteItem{
 
     @Override
     public void saveDb(Context context) {
-
+        //return 0;
     }
 
     @Override
