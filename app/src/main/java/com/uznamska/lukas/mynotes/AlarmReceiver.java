@@ -26,12 +26,13 @@ public class AlarmReceiver extends BroadcastReceiver {
         Log.d("CC", "Receiver!!!!");
         int pendingAlarmId = intent.getIntExtra(PendingAlarmsTable.COLUMN_ID, -1);
         int reminderId = intent.getIntExtra(PendingAlarmsTable.COLUMN_REMINDER_ID, -1);
+
         ItemPendingAlarm pendingAlarm = new ItemPendingAlarm();
         pendingAlarm.setId(pendingAlarmId);
         pendingAlarm.setStatus(PendingAlarmsTable.EXPIRED);
         pendingAlarm.saveDb(context);
-
-        PendingIntent pi = PendingIntent.getActivity(context, 1, new Intent("com.uznamska.lukas.mynotes.MainActivity"), 0);
+        Intent notIntent = new Intent(context, MainActivity.class);
+        PendingIntent pi = PendingIntent.getActivity(context, 1, notIntent, 0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentIntent(pi)
                 .setSmallIcon(R.drawable.emma)
@@ -39,26 +40,11 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setTicker("this is ticker text")
                 .setContentIntent(pi);
 
-
         Notification n = builder.build();
-
-//        builder.setAutoCancel(false);
-//        builder.setTicker("this is ticker text");
-//        builder.setContentTitle("WhatsApp Notification");
-//        builder.setContentText("You have a new message");
-//        builder.setSmallIcon(R.drawable.ic_launcher);
-//        builder.setContentIntent(pendingIntent);
-//        builder.setOngoing(true);
-//        builder.setSubText("This is subtext...");   //API level 16
-//        builder.setNumber(100);
-
         n.defaults |= Notification.DEFAULT_VIBRATE;
-
         n.flags |= Notification.FLAG_AUTO_CANCEL;
 
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(11, n);
-
-
     }
 }

@@ -171,7 +171,6 @@ public class ListNote extends AbstractNote implements INoteForList {
     @Override
     public void loadItems(Context context){
         Cursor cursorlist;
-        //Uri noteListUri = NotesContentProvider.LIST_NOTES_CONTENT_URI;
         String selection = NotesTable.TABLE_NAME + "." + NotesTable.COLUMN_ID + " = ?";
         String[] selectionArgs = {String.valueOf(getId())};
         String[] projectionl = {
@@ -208,18 +207,19 @@ public class ListNote extends AbstractNote implements INoteForList {
         super.saveDb(context, order);
         if(saver != null) {
             saver.storeAsListNote();
-
             saveReminders(context);
         }
     }
 
     @Override
     public void deleteFromDb(Context context) {
+        super.cleanUpAfterNote(context);
         Uri toDeleteUri = Uri.parse(NotesContentProvider.NOTES_CONTENT_URI + "/" + getId());
         Uri tmpuri = NotesContentProvider.LIST_CONTENT_URI;
         String selection = ListItemTable.NOTE_ID + " = ?";
         String[] selectionArgs = new String[]{String.valueOf(getId())};
         context.getContentResolver().delete(tmpuri, selection, selectionArgs);
         context.getContentResolver().delete(toDeleteUri, null, null);
+
     }
 }

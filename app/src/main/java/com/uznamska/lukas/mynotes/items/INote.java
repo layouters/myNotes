@@ -32,9 +32,6 @@ public interface INote {
     Iterator getListItemIterator();
     Iterator getReminderIterator();
 
-    IReminder getReminder();
-    void setReminder(IReminder reminder);
-
     void loadItems(Context context);
     void loadReminders(Context context);
     void saveDb(Context context, int order);

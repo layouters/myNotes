@@ -115,6 +115,7 @@ public class AlarmService extends IntentService {
         @Override
         public void execute(String ...args) {
             Log.d(TAG, "I will be refreshing all the alarms after device got rebooted");
+            reSetAlarms();
         }
     }
 

@@ -5,11 +5,12 @@
 package com.uznamska.lukas.mynotes.items;
 
 import android.content.Context;
+import android.net.Uri;
 
 /**
  * Created by Anna on 2016-03-18.
  */
-public abstract class AbstractNoteItem implements INoteItem{
+public abstract class AbstractNoteItem implements INoteItem {
 
     private int mId;
 

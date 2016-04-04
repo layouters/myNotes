@@ -52,12 +52,14 @@ public class TextNote extends AbstractNote implements INote {
         super.saveDb(context, order);
         if(saver != null) {
             saver.storeAsTextNote();
-            saveReminders(context);
         }
+        saveReminders(context);
     }
 
     @Override
     public void deleteFromDb(Context context) {
+        Log.d(TAG, "Delete note");
+        super.cleanUpAfterNote(context);
         Uri toDeleteUri = Uri.parse(NotesContentProvider.NOTES_CONTENT_URI + "/" + getId());
         context.getContentResolver().delete(toDeleteUri, null, null);
 

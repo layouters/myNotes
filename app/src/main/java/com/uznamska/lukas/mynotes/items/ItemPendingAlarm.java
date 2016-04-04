@@ -77,6 +77,8 @@ public class ItemPendingAlarm  extends AbstractNoteItem {
 
     @Override
     public void deleteFromDb(Context context) {
+        //cacels alarm
+        //delete from database
 
     }
 

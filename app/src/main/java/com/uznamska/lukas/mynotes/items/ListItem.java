@@ -29,7 +29,6 @@ public class ListItem extends AbstractNoteItem {
     }
 
     public ListItem() {
-      //  text = "empty text";
 
     }
 
@@ -50,15 +49,4 @@ public class ListItem extends AbstractNoteItem {
     public boolean isSimple() {
         return true;
     }
-
-//    public void setUpdateTextListener(IUpdateTextListener list) {
-//        listener = list;
-//    }
-//
-//    public void onUpdateText() {
-////        if(listener != null) {
-////            listener.onUpdate();
-////            listener = null;
-////        }
-//    }
 }

@@ -148,7 +148,17 @@ public class ItemReminder extends AbstractNoteItem implements IReminder {
             setTime(reminderTime);
             setNoteId(noteId);
         }
+    }
 
+    @Override
+    public void deleteFromDb(Context context) {
+        //delete pendings
+        Log.d(TAG, "Delete reminder " + getUri());
+        context.getContentResolver().delete(getUri(), null, null);
+    }
+
+    private Uri getUri() {
+        return Uri.parse(NotesContentProvider.REMINDER_CONTENT_URI + "/" + getId());
     }
 
 

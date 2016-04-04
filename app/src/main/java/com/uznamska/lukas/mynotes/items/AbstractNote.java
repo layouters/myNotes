@@ -99,10 +99,7 @@ public abstract class AbstractNote  implements INote {
     private int id;
     private int order;
     private int simpleItems;
-    private IReminder mReminder;
     INoteSaver saver;
-
-  //  IDBHandler handler;
 
     protected List<INoteItem> items;
 
@@ -110,14 +107,6 @@ public abstract class AbstractNote  implements INote {
     public int getId() {
         return id;
     }
-
-//    public IDBHandler getDbHandler() {
-//        return handler;
-//    }
-//
-//    public void setDbHandler(IDBHandler handler) {
-//        this.handler = handler;
-//    }
 
     @Override
     public String toString() {
@@ -160,7 +149,7 @@ public abstract class AbstractNote  implements INote {
             pos++;
         }
         Log.e(TAG, className + " has not been found this is the pattern "
-                             + getItems().get(0).getClass().getName());
+                + getItems().get(0).getClass().getName());
         return -1;
     }
 
@@ -255,25 +244,32 @@ public abstract class AbstractNote  implements INote {
         return new ReminderItemIterator();
     }
 
-    @Override
-    public IReminder getReminder() {
-        if(mReminder == null) {
-            mReminder = new ItemReminder();
-        }
-        return mReminder;
-    }
-
-    public Uri getUri() {
-        return Uri.parse(NotesContentProvider.NOTES_CONTENT_URI + "/" + this.getId());
-    }
-
-    @Override
-    public void setReminder(IReminder reminder) {
-        mReminder = reminder;
-    }
 
     @Override
     public void loadItems(Context context){
+
+    }
+
+    @Override
+    public Uri getUri() {
+        return Uri.parse(NotesContentProvider.NOTES_CONTENT_URI + "/" + getId());
+    }
+
+    protected void cleanUpAfterNote(Context context) {
+        Log.d(TAG, "Clean up aftre note");
+        Iterator it  = getItemsIterator();
+        while(it.hasNext()) {
+            INoteItem item = it.next();
+            Log.d(TAG, "Clean item " + item);
+            item.deleteFromDb(context);
+        }
+
+        Iterator itr = getReminderIterator();
+        while(itr.hasNext()) {
+            INoteItem item = itr.next();
+            Log.d(TAG, "Clean item " + item);
+            item.deleteFromDb(context);
+        }
 
     }
 

@@ -241,6 +241,20 @@ public class NotesContentProvider extends ContentProvider {
                             selectionArgs);
                 }
                 break;
+            case REMINDER_ITEMS_ID:
+                String itereminderid = uri.getLastPathSegment();
+                if (TextUtils.isEmpty(selection)) {
+                    rowsDeleted = sqlDB.delete(ReminderItemTable.TABLE_REMINDERITEMS,
+                            ReminderItemTable.COLUMN_ID + "=" + itereminderid,
+                            null);
+                } else {
+                    rowsDeleted = sqlDB.delete(ReminderItemTable.TABLE_REMINDERITEMS,
+                            ReminderItemTable.COLUMN_ID + "=" + itereminderid
+                                    + " and " + selection,
+                            selectionArgs);
+                }
+
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
