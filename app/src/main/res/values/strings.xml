@@ -23,4 +23,5 @@
     <string name="list_item">List item</string>
     <string name="set_date">Set date</string>
     <string name="set_location">Set location</string>
+    <string name="cancel_alarm">Cancel alarm</string>
 </resources>

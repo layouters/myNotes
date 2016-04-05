@@ -142,12 +142,9 @@ public class NotesContentProviderProxy implements INoteContentProvider {
                 note.setId(id);
                 note.setListOrder(listOrder);
                 note.loadItems(mContext);
+                note.loadReminders(mContext);
                 list.add(note);
             }
-        }
-        int next = 0;
-        if (list.size() > 0) {
-            next = list.get(list.size() - 1).getListOrder() + 1;
         }
         return list;
     }

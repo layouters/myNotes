@@ -96,7 +96,6 @@ public class NotesContentProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
-        // Uisng SQLiteQueryBuilder instead of query() method
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
         int uriType = sURIMatcher.match(uri);
@@ -254,6 +253,16 @@ public class NotesContentProvider extends ContentProvider {
                             selectionArgs);
                 }
 
+                break;
+
+            case PENDING_ALARM_ITEMS_ID:
+                String pendingId = uri.getLastPathSegment();
+                rowsDeleted = sqlDB.delete(PendingAlarmsTable.TABLE_NAME,
+                        PendingAlarmsTable.COLUMN_ID + "=" + pendingId, null);
+                break;
+
+            case PENDING_ALARM_ITEMS:
+                rowsDeleted = sqlDB.delete(PendingAlarmsTable.TABLE_NAME, selection, selectionArgs);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);

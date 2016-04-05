@@ -41,7 +41,6 @@ public class AlarmService extends IntentService {
 
     abstract class AbstractCommand implements ICommand{
         protected void reSetAlarms(String ...args) {
-            Intent i;
             PendingIntent pi;
             AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             Cursor pendings = ItemPendingAlarm.getRelatedAlarms(getApplicationContext(), args);
@@ -49,13 +48,7 @@ public class AlarmService extends IntentService {
                 while (pendings.moveToNext()) {
                     long now = System.currentTimeMillis();
                     long time, diff;
-                    i = new Intent(getApplicationContext(), AlarmReceiver.class);
-                    i.putExtra(PendingAlarmsTable.COLUMN_ID, pendings.getInt(pendings.getColumnIndex(PendingAlarmsTable.COLUMN_ID)));
-                    i.putExtra(PendingAlarmsTable.COLUMN_REMINDER_ID,
-                            pendings.getInt(pendings.getColumnIndex(PendingAlarmsTable.COLUMN_REMINDER_ID)));
-
-                    pi = PendingIntent.getBroadcast(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-
+                    pi = buildPendingIntent(pendings);
                     time = pendings.getLong(pendings.getColumnIndex(PendingAlarmsTable.COLUMN_TIME));
                     diff = time - now + (long)DateUtils.MIN;
                     if (diff > 0 && diff < DateUtils.YEAR) {
@@ -64,6 +57,14 @@ public class AlarmService extends IntentService {
                 }
                 pendings.close();
             }
+        }
+
+        PendingIntent buildPendingIntent(Cursor pendings) {
+            Intent in = new Intent(getApplicationContext(), AlarmReceiver.class);
+            in.putExtra(PendingAlarmsTable.COLUMN_ID, pendings.getInt(pendings.getColumnIndex(PendingAlarmsTable.COLUMN_ID)));
+            in.putExtra(PendingAlarmsTable.COLUMN_REMINDER_ID,
+                    pendings.getInt(pendings.getColumnIndex(PendingAlarmsTable.COLUMN_REMINDER_ID)));
+            return PendingIntent.getBroadcast(getApplicationContext(), 0, in, PendingIntent.FLAG_UPDATE_CURRENT);
         }
     }
 
@@ -124,6 +125,22 @@ public class AlarmService extends IntentService {
         @Override
         public void execute(String ...args) {
             Log.d(TAG, "I will be cancelling alarms");
+            String reminderId = (args!=null && args.length>0) ? args[0] : null;
+            String pendingId = (args!=null && args.length>1) ? args[1] : null;
+            String status = PendingAlarmsTable.CANCELLED;
+            Cursor pendings = ItemPendingAlarm.getRelatedAlarms(getApplicationContext(), pendingId,
+                                                                reminderId);
+            PendingIntent pi;
+            AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+            if (pendings != null) {
+                while (pendings.moveToNext()) {
+                    pi = buildPendingIntent(pendings);
+                    am.cancel(pi);
+                }
+                pendings.close();
+            }
+            //context.getContentResolver().delete(getUri(), null, null);
         }
     }
 

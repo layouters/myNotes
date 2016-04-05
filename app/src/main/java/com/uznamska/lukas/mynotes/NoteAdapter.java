@@ -71,7 +71,7 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     showDatePicker();
                     return true;
                 case R.id.location_setter:
-                    showLocationPicker();
+                    //showLocationPicker();
                     return true;
                 default:
                     return false;
@@ -120,6 +120,25 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
     }
+
+    class ContextAlarmListener implements PopupMenu.OnMenuItemClickListener {
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+
+            switch (item.getItemId()) {
+                case R.id.alarm_canceller:
+                    cancelAlarm();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        void cancelAlarm() {
+
+        }
+    }
     private static final String TAG = "Note:NoteAdapter";
     static int counter = 0 ;
     private final Context mContext;
@@ -144,18 +163,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     enum EditorType {
         EDIT,
         NEW
-    }
-
-    public void cancelAlarm() {
-        AlarmManager manager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        manager.cancel(alarmIntent);
-        Toast.makeText(mContext, "Alarm Canceled", Toast.LENGTH_SHORT).show();
-    }
-
-
-    private void showLocationPicker() {
-        cancelAlarm();
-        Log.d(TAG,"Location set");
     }
 
     enum DisplayMode {
@@ -286,6 +293,13 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             } else if(holder instanceof ReminderViewHolder) {
                 ReminderViewHolder tmpHolder = (ReminderViewHolder)holder;
                 Log.d(TAG, "Reminder clicked| view id:  " + tmpHolder.itemView.getId());
+
+                Toast.makeText(mContext, "Reminder Adder clicked", Toast.LENGTH_SHORT).show();
+                PopupMenu popup = new PopupMenu(mContext, tmpHolder.itemView);
+                popup.setOnMenuItemClickListener(new ContextAlarmListener());
+                MenuInflater inflater = popup.getMenuInflater();
+                inflater.inflate(R.menu.alarm_type_menu, popup.getMenu());
+                popup.show();
 
                 //notifyDataSetChanged();
             } else if(holder instanceof ReminderAdderViewHolder) {

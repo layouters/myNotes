@@ -264,13 +264,6 @@ public abstract class AbstractNote  implements INote {
             item.deleteFromDb(context);
         }
 
-        Iterator itr = getReminderIterator();
-        while(itr.hasNext()) {
-            INoteItem item = itr.next();
-            Log.d(TAG, "Clean item " + item);
-            item.deleteFromDb(context);
-        }
-
     }
 
     @Override
@@ -295,11 +288,12 @@ public abstract class AbstractNote  implements INote {
             String noteTitle = cursorlist.getString(3);
             int noteId = cursorlist.getInt(4);
             Log.d(TAG, "DateItem: " + reminderDate + " Note title " + noteTitle);
-            IReminder r = new ItemReminder();
+            ItemReminder r = new ItemReminder();
             r.setDate(reminderDate);
             r.setTime(reminderTime);
             r.setId(remId);
             r.setNoteId(noteId);
+            r.loadPendings(context);
             addItemReminder((AbstractNoteItem) r);
         }
 

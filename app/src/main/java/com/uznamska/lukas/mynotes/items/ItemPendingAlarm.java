@@ -77,9 +77,17 @@ public class ItemPendingAlarm  extends AbstractNoteItem {
 
     @Override
     public void deleteFromDb(Context context) {
-        //cacels alarm
-        //delete from database
+       Log.e(TAG, "Delete pendings and send cancel!!!!!!!!!!!!!!!!!");
+        //context.getContentResolver().delete(getUri(), null, null);
+        cancelPendingAlarm(context);
+    }
 
+    private void cancelPendingAlarm(Context context) {
+        Intent service = new Intent(context, AlarmService.class);
+        service.putExtra(PendingAlarmsTable.COLUMN_REMINDER_ID, String.valueOf(getReminderId()));
+        service.putExtra(PendingAlarmsTable.COLUMN_ID, String.valueOf(getId()));
+        service.setAction(AlarmService.CANCEL);
+        context.startService(service);
     }
 
     public static  Cursor getRelatedAlarms(Context context, String... args) {
@@ -99,5 +107,9 @@ public class ItemPendingAlarm  extends AbstractNoteItem {
        return  context.getContentResolver().query(NotesContentProvider.PENDING_ALARM_CONTENT_URI,
                                                     columns, selection, null, null);
 
+    }
+
+    private Uri getUri() {
+        return Uri.parse(NotesContentProvider.PENDING_ALARM_CONTENT_URI+ "/" + getId());
     }
 }

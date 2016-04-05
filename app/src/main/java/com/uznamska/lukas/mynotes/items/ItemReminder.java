@@ -17,6 +17,8 @@ import com.uznamska.lukas.mynotes.database.NotesTable;
 import com.uznamska.lukas.mynotes.database.PendingAlarmsTable;
 import com.uznamska.lukas.mynotes.database.ReminderItemTable;
 
+import java.util.*;
+
 
 public class ItemReminder extends AbstractNoteItem implements IReminder {
     private static final String TAG = "MyNotes:ItemReminder";
@@ -25,6 +27,16 @@ public class ItemReminder extends AbstractNoteItem implements IReminder {
     String mTime;
     boolean mIsSet = false;
     int mNoteId;
+
+    List<ItemPendingAlarm> pendings = new ArrayList<>();
+
+    public List<ItemPendingAlarm> getPendings() {
+        return pendings;
+    }
+
+    public void setPendings(List<ItemPendingAlarm> pendings) {
+        this.pendings = pendings;
+    }
 
     @Override
     public int getNoteId() {
@@ -148,11 +160,37 @@ public class ItemReminder extends AbstractNoteItem implements IReminder {
             setTime(reminderTime);
             setNoteId(noteId);
         }
+        cursorlist.close();
+        loadPendings(context);
+
+    }
+    public void loadPendings(Context context) {
+        Cursor cp = ItemPendingAlarm.getRelatedAlarms(context, null, String.valueOf(getId()));
+        //pendings.clear();
+        while(cp.moveToNext()) {
+            Log.d(TAG, "Pending alarm!!!!!!!!!!!!!!!!!1");
+            ItemPendingAlarm pending = new ItemPendingAlarm();
+            pending.setId(cp.getInt(0));
+            pending.setReminderId(cp.getInt(1));
+            pending.setDateTime(cp.getLong(2));
+            pending.setStatus(cp.getString(3));
+
+            pendings.add(pending);
+        }
+        cp.close();
     }
 
     @Override
     public void deleteFromDb(Context context) {
-        //delete pendings
+        loadPendings(context);
+        java.util.Iterator<ItemPendingAlarm> it  = pendings.iterator();
+        Log.d(TAG, "Delete all pendings");
+
+
+        while(it.hasNext()) {
+            Log.d(TAG, "Delete pending ");
+            it.next().deleteFromDb(context);
+        }
         Log.d(TAG, "Delete reminder " + getUri());
         context.getContentResolver().delete(getUri(), null, null);
     }
