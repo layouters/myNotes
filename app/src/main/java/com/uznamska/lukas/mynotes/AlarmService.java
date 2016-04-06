@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.util.Log;
 
+import com.uznamska.lukas.mynotes.contentprovider.NotesContentProviderProxy;
 import com.uznamska.lukas.mynotes.database.PendingAlarmsTable;
 import com.uznamska.lukas.mynotes.items.ItemPendingAlarm;
 import com.uznamska.lukas.mynotes.items.ItemReminder;
@@ -140,7 +141,10 @@ public class AlarmService extends IntentService {
                 }
                 pendings.close();
             }
-            //context.getContentResolver().delete(getUri(), null, null);
+            ItemPendingAlarm pendingAlarm = new ItemPendingAlarm();
+            pendingAlarm.setId(Integer.parseInt(pendingId));
+            pendingAlarm.setStatus(PendingAlarmsTable.CANCELLED);
+            pendingAlarm.saveDb(getApplicationContext());
         }
     }
 
@@ -160,9 +164,14 @@ public class AlarmService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         String action = intent.getAction();
         String reminderId = intent.getStringExtra(PendingAlarmsTable.COLUMN_REMINDER_ID);
+        String alarmId = intent.getStringExtra(PendingAlarmsTable.COLUMN_ID);
         Log.d(TAG, "Reminder id: " + reminderId);
         if (matcher.matchAction(action)) {
-            mCmdMap.get(action).execute(reminderId);
+            mCmdMap.get(action).execute(reminderId,alarmId);
         }
+
+        NotesContentProviderProxy proxy = new NotesContentProviderProxy(getApplicationContext());
+        proxy.removeCancelledNotes();
+
     }
 }

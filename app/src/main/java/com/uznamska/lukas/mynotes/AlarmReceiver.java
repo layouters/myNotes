@@ -22,29 +22,31 @@ public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         // For our recurring task, we'll just display a message
-        Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
-        Log.d("CC", "Receiver!!!!");
-        int pendingAlarmId = intent.getIntExtra(PendingAlarmsTable.COLUMN_ID, -1);
-        int reminderId = intent.getIntExtra(PendingAlarmsTable.COLUMN_REMINDER_ID, -1);
+      //  if (!intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+            Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
+            Log.d("CC", "Receiver!!!!");
+            int pendingAlarmId = intent.getIntExtra(PendingAlarmsTable.COLUMN_ID, -1);
+            int reminderId = intent.getIntExtra(PendingAlarmsTable.COLUMN_REMINDER_ID, -1);
 
-        ItemPendingAlarm pendingAlarm = new ItemPendingAlarm();
-        pendingAlarm.setId(pendingAlarmId);
-        pendingAlarm.setStatus(PendingAlarmsTable.EXPIRED);
-        pendingAlarm.saveDb(context);
-        Intent notIntent = new Intent(context, MainActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(context, 1, notIntent, 0);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setContentIntent(pi)
-                .setSmallIcon(R.drawable.emma)
-                .setContentTitle("Title")
-                .setTicker("this is ticker text")
-                .setContentIntent(pi);
+            ItemPendingAlarm pendingAlarm = new ItemPendingAlarm();
+            pendingAlarm.setId(pendingAlarmId);
+            pendingAlarm.setStatus(PendingAlarmsTable.EXPIRED);
+            pendingAlarm.saveDb(context);
+            Intent notIntent = new Intent(context, MainActivity.class);
+            PendingIntent pi = PendingIntent.getActivity(context, 1, notIntent, 0);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                    .setContentIntent(pi)
+                    .setSmallIcon(R.drawable.emma)
+                    .setContentTitle("Title")
+                    .setTicker("this is ticker text")
+                    .setContentIntent(pi);
 
-        Notification n = builder.build();
-        n.defaults |= Notification.DEFAULT_VIBRATE;
-        n.flags |= Notification.FLAG_AUTO_CANCEL;
+            Notification n = builder.build();
+            n.defaults |= Notification.DEFAULT_VIBRATE;
+            n.flags |= Notification.FLAG_AUTO_CANCEL;
 
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(11, n);
-    }
+            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            nm.notify(11, n);
+        }
+   // }
 }

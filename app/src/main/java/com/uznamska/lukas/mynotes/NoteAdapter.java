@@ -136,6 +136,12 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         void cancelAlarm() {
+            if(mNote.getReminderIterator().hasNext()){
+                mNote.getReminderIterator().next().deleteFromDb(mContext);
+                mNote.removeItemReminder();
+            }
+            notifyDataSetChanged();
+
 
         }
     }
@@ -150,7 +156,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private final int ITEM_REMINDER_ADDER = 5;
 
     HolderAbstractFactory factoryHolder;
-    int mOverhead = 3;
 
     PresentationMode mDisplayMode;
     INote mNote;
@@ -300,8 +305,6 @@ public class NoteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.alarm_type_menu, popup.getMenu());
                 popup.show();
-
-                //notifyDataSetChanged();
             } else if(holder instanceof ReminderAdderViewHolder) {
                 ReminderAdderViewHolder tmpHolder = (ReminderAdderViewHolder)holder;
                 Log.d(TAG, "Reminder Adder clicked| view id:  " + tmpHolder.itemView.getId());

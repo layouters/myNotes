@@ -190,6 +190,19 @@ public abstract class AbstractNote  implements INote {
         addItem(item);
     }
 
+     @Override
+     public void removeItemReminder() {
+         int pos = findFirstItemOfType(ItemReminder.class.getName());
+         if(pos > 0) {
+             Log.d(TAG, "Removing item from pos " + pos);
+             removeItem(pos);
+         }
+         //TODO: FIX THIS METHOD
+         //countReminders++;
+         ItemReminderAdder adder = new ItemReminderAdder();
+         addItem(adder);
+     }
+
     protected List<INoteItem> getItems() {
         return items;
     }

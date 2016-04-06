@@ -5,6 +5,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.uznamska.lukas.mynotes">
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -39,7 +40,8 @@
         <receiver android:name=".DeviceBootReceiver"
             android:enabled="false">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
 

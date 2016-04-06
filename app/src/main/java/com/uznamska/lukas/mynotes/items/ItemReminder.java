@@ -166,7 +166,6 @@ public class ItemReminder extends AbstractNoteItem implements IReminder {
     }
     public void loadPendings(Context context) {
         Cursor cp = ItemPendingAlarm.getRelatedAlarms(context, null, String.valueOf(getId()));
-        //pendings.clear();
         while(cp.moveToNext()) {
             Log.d(TAG, "Pending alarm!!!!!!!!!!!!!!!!!1");
             ItemPendingAlarm pending = new ItemPendingAlarm();

@@ -69,8 +69,8 @@ public class ItemPendingAlarm  extends AbstractNoteItem {
                 cv.put(PendingAlarmsTable.COLUMN_TIME, getDateTime());
             if (getStatus()  != null)
                 cv.put(PendingAlarmsTable.COLUMN_STATUS, getStatus() );
-            Uri uri = Uri.parse(NotesContentProvider.PENDING_ALARM_CONTENT_URI + "/" + this.getId());
-            int updated = context.getContentResolver().update(uri, cv, null, null);
+            //Uri uri = Uri.parse(NotesContentProvider.PENDING_ALARM_CONTENT_URI + "/" + this.getId());
+            int updated = context.getContentResolver().update(getUri(), cv, null, null);
            //return getId();
         }
     }

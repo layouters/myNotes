@@ -38,5 +38,6 @@ public interface INote {
     Uri getUri();
     void deleteFromDb(Context context);
     void addItemReminder(INoteItem item);
+    void removeItemReminder();
 }
 

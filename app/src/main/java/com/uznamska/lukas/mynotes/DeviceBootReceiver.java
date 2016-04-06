@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -18,6 +19,7 @@ public class DeviceBootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d("BootReceiver", "Dddddddd");
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
             Intent service = new Intent(context, AlarmService.class);
             service.setAction(AlarmService.REFRESH_ALL);

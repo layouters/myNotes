@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.uznamska.lukas.mynotes.database.ListItemTable;
 import com.uznamska.lukas.mynotes.database.NotesTable;
+import com.uznamska.lukas.mynotes.database.PendingAlarmsTable;
 import com.uznamska.lukas.mynotes.database.ReminderItemTable;
 import com.uznamska.lukas.mynotes.items.AbstractNote;
 import com.uznamska.lukas.mynotes.items.INote;
@@ -29,12 +30,20 @@ import java.util.List;
 
 public class NotesContentProviderProxy implements INoteContentProvider {
     private static final String TAG = "Notes:ProxyContentProvider";
+
     Context mContext;
     NoteFactory factory;
 
+    public NotesContentProviderProxy() {
+
+    }
     public NotesContentProviderProxy(Context context) {
         mContext = context;
         factory = new NoteFactory();
+    }
+
+    public void setContext(Context mContext) {
+        this.mContext = mContext;
     }
 
     @Override
@@ -147,5 +156,11 @@ public class NotesContentProviderProxy implements INoteContentProvider {
             }
         }
         return list;
+    }
+
+    public void removeCancelledNotes() {
+        String selection = PendingAlarmsTable.TABLE_NAME + "." + PendingAlarmsTable.COLUMN_STATUS +" = ?";
+        String[] selectionArgs = {PendingAlarmsTable.CANCELLED};
+        mContext.getContentResolver().delete(NotesContentProvider.PENDING_ALARM_CONTENT_URI, selection, selectionArgs);
     }
 }
